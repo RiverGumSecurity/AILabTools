@@ -2,6 +2,7 @@
 
 import argparse
 import sqlite3
+import hashlib
 import pathlib
 import re
 
@@ -35,8 +36,9 @@ class Chunker():
                     if self.overlap > 0:
                         data += '\n'.join(last_data[-self.overlap:])
                     print(f'[*] Log chunk #{i//1000:03d} with {len(data.split('\n'))} lines of log data inserted into SQL db')
-                    sql = 'INSERT OR REPLACE INTO logchunks VALUES (?, ?)'
-                    cur.execute(sql, (i // 1000, data))
+                    sql = 'INSERT OR REPLACE INTO logchunks VALUES (?, ?, ?)'
+                    sha256hash = hashlib.sha256(data.encode()).hexdigest()
+                    cur.execute(sql, (i // 1000, sha256hash, data))
                     self.dbh.commit()
                     last_data = data.split('\n')
                     data = ''
@@ -48,6 +50,7 @@ class Chunker():
         sql = '''\
 CREATE TABLE IF NOT EXISTS logchunks (
     id INTEGER PRIMARY KEY,
+    sha256hash TEXT,
     datachunk BLOB
 );'''
         cur = dbh.cursor()
