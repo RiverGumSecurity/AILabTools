@@ -15,9 +15,11 @@ class LLMLogAnalyzer():
     def __init__(self, prompt, model="gpt-4.1-mini", temp=0.3, prev=False,
                  max_tokens=8192, skip=0, sqlite_filename='logchunks.db',
                  final=False, response_prefix='llm_response',
-                 nummodels=10, listmodels=False, listallmodels=False):
+                 nummodels=10, listmodels=False, listallmodels=False,
+                 final_report_file='final_report.md'):
 
-        self.basedir = pathlib.Path().cwd() / ".data"
+        self.datadir = pathlib.Path('.data')
+        self.basedir = pathlib.Path().cwd() / self.datadir
         if not self.basedir.is_dir():
             self.basedir.mkdir()
 
@@ -32,23 +34,25 @@ class LLMLogAnalyzer():
         self.listmodels = listmodels
         self.listallmodels = listallmodels
         self.nummodels = nummodels
-        self.response_prefix = self.basedir / response_prefix
+        self.response_prefix = self.datadir / response_prefix
         self.sqlite_filename = self.basedir / sqlite_filename
         self.dbh = self.sqlconnect()
         self.prev_response = ''
+        self.final_report_file = pathlib.Path(final_report_file)
 
         if listmodels or listallmodels:
             self.list_models()
         else:
-            # grab prompt
+            print(f'[*] LLMLogAnalyzer, OpenAI model = [{self.model}]')
             with open(prompt, 'rt') as fp:
                     prompt_content = fp.read()
             self.prompt, self.final_prompt = prompt_content.split('[FINAL_SUMMARY_PROMPT]')
             _, self.prompt = self.prompt.split('[LOG_CHUNK_PROMPT]')
-
             if final:
+                print(f'[*] Final Summary Mode')
                 self.summarize()
             else:
+                print(f'[*] LogChunk Analysis Mode')
                 self.run()
 
     def run(self):
@@ -73,8 +77,10 @@ class LLMLogAnalyzer():
 ## LoggingData
 {r[1]}
 '''
-            print(f'[+] Sending LLM prompt request for chunk #{i:002d} ...')
+            print(f'[+] Sending LLM prompt request for chunk #{i:002d}')
+            print(f'[+] ... Please Wait ...', end='', flush=True)
             resp = self.llmquery(newprompt)
+            print(f'\r' + ' ' * 40 + '\r', end='', flush=True)
             if resp['success']:
                 self.prev_response = resp['response']
                 filename = f'{self.response_prefix}_{i:002d}.txt'
@@ -93,9 +99,15 @@ class LLMLogAnalyzer():
                 summaries += fp.read() + '\n\n'
         summaries += '# END OF SUMMARIES\n'
         prompt = self.final_prompt.format(summaries)
+        print(f'[+] Sending LLM prompt request for final summary.')
+        print(f'[+] ... Please Wait ...', end='', flush=True)
         resp = self.llmquery(prompt)
+        print(f'\r' + ' ' * 40 + '\r', end='', flush=True)
         if resp['success']:
-            print(resp['response'])
+            with open(self.final_report_file, 'wt') as fp:
+                print(f'[+] Writing final summary report to [{self.final_report_file}]')
+                fp.write(resp['response'])
+                print(f'[+] SUCCESS!')
 
     def sqlconnect(self):
         dbh = sqlite3.connect(self.sqlite_filename)
@@ -174,7 +186,7 @@ if __name__ == "__main__":
         '-p', action='store_true', default=False,
         help='Print previous/interim LLM responses')
     parser.add_argument(
-        '-m', '--model', default='gpt-4o-mini',
+        '-m', '--model', default='gpt-4.1-mini',
         help='OpenAI model to use')
     parser.add_argument(
         '-t', '--temp', type=float, default=0.3,

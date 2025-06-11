@@ -18,7 +18,7 @@ Your task is to thoroughly analyze this authentication log to identify any evide
 
 # Output Format
 
-The output should include the following:
+Please output the information in a clear and structured format with the following sections:
 - Summary of normal activity.
 - List of any suspicious activity discovered.
 - List of IP source addresses involved in suspicious activity.
@@ -39,6 +39,8 @@ Please analyze this combined output to identify overarching trends, recurring IP
 {}
 
 # Output Format
+
+Please output the information in a clear and structured format with the following sections:
 - Consolidated findings
 - Correlated suspicious IPs, users, and timeframes
 - Assessment of compromise likelihood
