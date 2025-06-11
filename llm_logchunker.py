@@ -4,6 +4,7 @@ import argparse
 import sqlite3
 import hashlib
 import pathlib
+import json
 import re
 
 
@@ -73,7 +74,10 @@ if __name__ == '__main__':
 ---------------------------------------------''')
     parser.add_argument(
         '-o', '--overlap', type=int, default=20,
-         help='number of log lines to overlap/keep from last round (default=20)')
+        help='number of log recs to overlap/keep (default=20)')
+    parser.add_argument(
+        '-j', '--json', action='store_true', default=False,
+        help='JSON parsing mode')
     parser.add_argument(
         '-r', '--regexp', type=str,
         default=r'^\w{3}\s\d{1,2}\s\d{2}:\d{2}:\d{2}.+sshd',
