@@ -97,7 +97,7 @@ Before running either script, do the following from the command line:
 
 **Log Analysis Phase: Note this can take a long time.**
 
-    $ python llm_loganalyzer.py prompt.md
+    $ python llm_loganalyzer.py prompt-sshlogs.md
     [*] LLMLogAnalyzer, OpenAI model = [gpt-4.1-mini]
     [*] LogChunk Analysis Mode
     [+] Sending LLM prompt request for chunk #00
