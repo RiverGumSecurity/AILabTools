@@ -100,7 +100,7 @@ class LLMLogAnalyzer():
             print(f'{f.name}', end=', ', flush=True)
             with open(f, 'rt') as fp:
                 summaries += fp.read() + '\n\n'
-            time.sleep(0.5)
+            time.sleep(0.2)
         summaries += '# END OF SUMMARIES\n'
         prompt = self.final_prompt.format(summaries)
         print(f'\r\n[+] Sending LLM prompt request for final summary.')
