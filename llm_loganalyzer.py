@@ -83,9 +83,9 @@ class LLMLogAnalyzer():
             print(f'\r' + ' ' * 40 + '\r', end='', flush=True)
             if resp['success']:
                 self.prev_response = resp['response']
-                filename = f'{self.response_prefix}_{i:002d}.txt'
+                filename = f'{self.response_prefix}_{i:003d}.txt'
                 with open(filename, 'wt') as fp:
-                    print(f'[+] Writing #{i:002d} LLM response to [{filename}]')
+                    print(f'[+] Writing #{i:003d} LLM response to [{filename}]')
                     fp.write(self.prev_response)
             else:
                 print(f'[-] ERROR: {resp}')
@@ -93,13 +93,17 @@ class LLMLogAnalyzer():
 
     def summarize(self):
         summaries = '# START OF SUMMARIES\n'
-        for f in pathlib.Path('.').glob(f'{self.response_prefix}_*.txt'):
+        print('[+] Reading log analysis responses: ', end='', flush=True)
+        files = sorted(pathlib.Path('.').glob(f'{self.response_prefix}_*.txt'))
+        for f in files:
             summaries += f'## Summary from filename: {f}\n'
+            print(f'{f.name}', end=', ', flush=True)
             with open(f, 'rt') as fp:
                 summaries += fp.read() + '\n\n'
+            time.sleep(0.5)
         summaries += '# END OF SUMMARIES\n'
         prompt = self.final_prompt.format(summaries)
-        print(f'[+] Sending LLM prompt request for final summary.')
+        print(f'\r\n[+] Sending LLM prompt request for final summary.')
         print(f'[+] ... Please Wait ...', end='', flush=True)
         resp = self.llmquery(prompt)
         print(f'\r' + ' ' * 40 + '\r', end='', flush=True)
