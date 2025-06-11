@@ -87,3 +87,27 @@ Before running either script, do the following from the command line:
     pip install -r requirements.txt
     export OPEN_API_KEY="<insert your key text here...>"
 
+#### Example Script Execution
+
+1. Log Chunking Phase
+
+    $ python llm_logchunker.py ssh_auth_logs/auth.log
+    [*] LogChunker: SQL database filename = [/Users/joff.thyer/Projects/AILabTools/.data/logchunks.db]
+    [+] Inserted 55 chunks consisting of 55843 lines of log data into SQL database
+
+2. Log Analysis Phase: Note this can take a long time.
+
+    $ python llm_loganalyzer.py prompt.md
+    [*] LLMLogAnalyzer, OpenAI model = [gpt-4.1-mini]
+    [*] LogChunk Analysis Mode
+    [+] Sending LLM prompt request for chunk #00
+    [+] Writing #000 LLM response to [.data/llm_response_000.txt]
+    [+] Sending LLM prompt request for chunk #01
+    [+] Writing #001 LLM response to [.data/llm_response_001.txt]
+    [+] Sending LLM prompt request for chunk #02
+    [+] Writing #002 LLM response to [.data/llm_response_002.txt]
+    [+] Sending LLM prompt request for chunk #03
+    [+] Writing #003 LLM response to [.data/llm_response_003.txt]
+    ... output truncated ...
+
+
