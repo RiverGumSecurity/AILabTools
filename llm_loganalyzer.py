@@ -14,34 +14,42 @@ class LLMLogChunker():
 
     def __init__(self, prompt, model="gpt-4.1-mini", temp=0.3, prev=False,
                  max_tokens=8192, skip=0, sqlite_filename='logchunks.db',
-                 final=False, response_prefix='llm_response'):
+                 final=False, response_prefix='llm_response',
+                 nummodels=10, listmodels=False, listallmodels=False):
 
         self.basedir = pathlib.Path().cwd() / ".data"
         if not self.basedir.is_dir():
             self.basedir.mkdir()
 
         openai.api_key = os.getenv("OPENAI_API_KEY")
-
-        # grab prompt
-        with open(prompt, 'rt') as fp:
-            prompt_content = fp.read()
-            self.prompt, self.final_prompt = prompt_content.split('[FINAL_SUMMARY_PROMPT]')
-            _, self.prompt = self.prompt.split('[LOG_CHUNK_PROMPT]')
+        self.client = openai.Client()
 
         self.model = model
         self.temp = temp
         self.prev = prev
         self.skip = skip
         self.max_tokens = max_tokens
+        self.listmodels = listmodels
+        self.listallmodels = listallmodels
+        self.nummodels = nummodels
         self.response_prefix = self.basedir / response_prefix
         self.sqlite_filename = self.basedir / sqlite_filename
         self.dbh = self.sqlconnect()
         self.prev_response = ''
-        print(f'[*] LLM Log Analyzer using model [{self.model}]')
-        if final:
-            self.summarize()
+
+        if listmodels or listallmodels:
+            self.list_models()
         else:
-            self.run()
+            # grab prompt
+            with open(prompt, 'rt') as fp:
+                    prompt_content = fp.read()
+            self.prompt, self.final_prompt = prompt_content.split('[FINAL_SUMMARY_PROMPT]')
+            _, self.prompt = self.prompt.split('[LOG_CHUNK_PROMPT]')
+
+            if final:
+                self.summarize()
+            else:
+                self.run()
 
     def run(self):
         sql = 'SELECT id, datachunk FROM logchunks'
@@ -92,10 +100,39 @@ class LLMLogChunker():
         dbh = sqlite3.connect(self.sqlite_filename)
         return dbh
 
+    def list_models(self):
+        try:
+            models = self.client.models.list()
+            modellist = sorted(models.data, key=lambda x: x.created, reverse=True)
+            if not self.listallmodels:
+                modellist = [ x for x in modellist if x.id.startswith('gpt') ]
+                print(f'''\
+[*] -----------------------------------------------------
+[*]  OpenAI has {len(modellist)} GPT models available
+[*] -----------------------------------------------------''')
+            else:
+                print(f'''\
+[*] -----------------------------------------------------
+[*]  OpenAI has {len(modellist)} total models available
+[*] -----------------------------------------------------''')
+            for i, m in enumerate(modellist):
+                print(f'[+] {datetime.fromtimestamp(m.created)}: {m.id}')
+                if i > self.nummodels:
+                    print(f'[*] ... truncating model list at {self.nummodels} ...')
+                    break
+        except openai.AuthenticationError:
+            print("Error: Invalid API key. Please check your OPENAI_API_KEY environment variable.")
+            return []
+        except openai.APIError as e:
+            print(f"OpenAI API Error: {e}")
+            return []
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            return []
+
     def llmquery(self, prompt):
         try:
-            client = openai.Client()
-            response = client.chat.completions.create(
+            response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant."},
@@ -151,11 +188,24 @@ if __name__ == "__main__":
         '-f', '--final', action='store_true', default=False,
         help='produce final summary only')
     parser.add_argument(
-        'prompt',
+        '-lm', '--listmodels', action='store_true', default=False,
+        help='list gpt available models')
+    parser.add_argument(
+        '-lam', '--listallmodels', action='store_true', default=False,
+        help='list all available models')
+    parser.add_argument(
+        '-nm', '--nummodels', type=int, default=20,
+        help='total number of models to show in list')
+    parser.add_argument(
+        'prompt', nargs="?",
         help='file containing prompt template text')
     args = parser.parse_args()
     LLMLogChunker(
         args.prompt,
         model=args.model, temp=args.temp,
         max_tokens=args.maxtokens,
-        prev=args.p, skip=args.skip, final=args.final)
+        prev=args.p, skip=args.skip,
+        listmodels=args.listmodels,
+        listallmodels=args.listallmodels,
+        nummodels=args.nummodels,
+        final=args.final)

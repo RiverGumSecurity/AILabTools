@@ -73,6 +73,6 @@ if __name__ == '__main__':
         '-r', '--regexp', type=str,
         default=r'^\w{3}\s\d{1,2}\s\d{2}:\d{2}:\d{2}.+sshd',
         help='regular expression to match logging line (default=sshd)')
-    parser.add_argument('filename', help='log file to chunk')
+    parser.add_argument('log_filename', help='log file to chunk')
     args = parser.parse_args()
-    Chunker(args.filename, overlap=args.overlap, regexp=args.regexp)
+    Chunker(args.log_filename, overlap=args.overlap, regexp=args.regexp)

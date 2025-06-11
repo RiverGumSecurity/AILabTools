@@ -73,4 +73,19 @@ to a sqlite database.
 into an OpenAI model using their API. The analyzer will save each interim response, and then has a **final pass** option
 to read all of the summaries for the final result.
 
+### Installation
+
+#### Requirements
+
+* Python 3.13.0 or higher
+* openai python module
+* An OpenAI API Key
+* Optionally: a dedicated conda environment
+
+Before running either script, do the following from the command line:
+
+    pip install -r requirements.txt
+    export OPEN_API_KEY="<insert your key text here...>"
+
+
 
