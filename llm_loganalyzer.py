@@ -10,7 +10,7 @@ import pathlib
 from datetime import datetime
 
 
-class LLMLogChunker():
+class LLMLogAnalyzer():
 
     def __init__(self, prompt, model="gpt-4.1-mini", temp=0.3, prev=False,
                  max_tokens=8192, skip=0, sqlite_filename='logchunks.db',
@@ -73,6 +73,7 @@ class LLMLogChunker():
 ## LoggingData
 {r[1]}
 '''
+            print(f'[+] Sending LLM prompt request for chunk #{i:002d} ...')
             resp = self.llmquery(newprompt)
             if resp['success']:
                 self.prev_response = resp['response']
@@ -200,7 +201,7 @@ if __name__ == "__main__":
         'prompt', nargs="?",
         help='file containing prompt template text')
     args = parser.parse_args()
-    LLMLogChunker(
+    LLMLogAnalyzer(
         args.prompt,
         model=args.model, temp=args.temp,
         max_tokens=args.maxtokens,

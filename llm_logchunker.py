@@ -22,10 +22,13 @@ class Chunker():
         self.chunksize = chunksize
         self.rxp = re.compile(regexp)
         self.dbh = self.sqlconnect()
+        print(f'[*] LogChunker: SQL database filename = [{self.sqlite_filename}]')
         self.run()
 
     def run(self):
         cur = self.dbh.cursor()
+        total_lines = 0
+        chunks = 0
         with open(self.filename, 'rt') as fp:
             last_data = []
             data = ''
@@ -35,15 +38,17 @@ class Chunker():
                 elif i > 0 and not i % self.chunksize:
                     if self.overlap > 0:
                         data += '\n'.join(last_data[-self.overlap:])
-                    print(f'[*] Log chunk #{i//1000:03d} with {len(data.split('\n'))} lines of log data inserted into SQL db')
                     sql = 'INSERT OR REPLACE INTO logchunks VALUES (?, ?, ?)'
                     sha256hash = hashlib.sha256(data.encode()).hexdigest()
                     cur.execute(sql, (i // 1000, sha256hash, data))
                     self.dbh.commit()
                     last_data = data.split('\n')
+                    chunks += 1
                     data = ''
                 last_data.append(line[:-1])
+                total_lines += 1
                 data += line
+        print(f'[+] Inserted {chunks} chunks consisting of {total_lines} lines of log data into SQL database')
 
     def sqlconnect(self):
         dbh = sqlite3.connect(self.sqlite_filename)

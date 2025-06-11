@@ -87,5 +87,3 @@ Before running either script, do the following from the command line:
     pip install -r requirements.txt
     export OPEN_API_KEY="<insert your key text here...>"
 
-
-
