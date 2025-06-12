@@ -53,9 +53,23 @@ class LLMLogAnalyzer():
                 self.summarize()
             else:
                 print(f'[*] LogChunk Analysis Mode')
-                self.run()
+                self.loganalysis()
 
-    def run(self):
+    def artifact_check(self):
+        files = sorted(pathlib.Path('.').glob(f'{self.response_prefix}_*.txt'))
+        if len(files) > 0:
+            print(f'[*] There are {len(files)} LLM response artifacts in the {self.datadir} directory')
+            print('[*] These are likely from a prior analysis.')
+            ans = input('[*] Do you wish to remove these files (Y|N)? ')
+            if ans and ans[0].lower() == 'y':
+                for f in files:
+                    print(f'[*] Removing file: {f}', end='', flush=True)
+                    pathlib.Path(f).unlink()
+                    time.sleep(0.2)
+                    print('\r', end='', flush=True)
+            print('')
+
+    def loganalysis(self):
         sql = 'SELECT id, datachunk FROM logchunks'
         cur = self.dbh.cursor()
         try:
@@ -63,6 +77,7 @@ class LLMLogAnalyzer():
         except sqlite3.OperationalError as e:
             print(f'[-] ERROR: {e} - You need to run log_chunker.py first!')
             sys.exit(1)
+        self.artifact_check()
         rows = cur.fetchall()
         for i, r in enumerate(rows):
             if i < self.skip:
@@ -93,14 +108,15 @@ class LLMLogAnalyzer():
 
     def summarize(self):
         summaries = '# START OF SUMMARIES\n'
-        print('[+] Reading log analysis responses: ', end='', flush=True)
         files = sorted(pathlib.Path('.').glob(f'{self.response_prefix}_*.txt'))
         for f in files:
             summaries += f'## Summary from filename: {f}\n'
-            print(f'{f.name}', end=', ', flush=True)
+            #print(f'{f.name}', end=', ', flush=True)
+            print(f'[+] Reading file: {f.name}', end='', flush=True)
             with open(f, 'rt') as fp:
                 summaries += fp.read() + '\n\n'
             time.sleep(0.2)
+            print('\r', end='', flush=True)
         summaries += '# END OF SUMMARIES\n'
         prompt = self.final_prompt.format(summaries)
         print(f'\r\n[+] Sending LLM prompt request for final summary.')
