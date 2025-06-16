@@ -1,0 +1,71 @@
+Incident Analysis Report  
+=======================  
+IncidentID: 20251206-153509  
+LogChunkID: 53/55  
+
+---  
+Summary of Normal Activity:  
+- Multiple successful authentications and token issuances for legitimate users such as jsteele@usculturaldynamics.com, jkapoor@usculturaldynamics.com, and splanck@usculturaldynamics.com.  
+- Regular mailbox access, file access, and modification activities consistent with normal user behavior.  
+- Conditional Access Policies being set and updated by system accounts (NT AUTHORITY\SYSTEM), which is typical for Exchange service operations.  
+- User agents and client apps include common browsers (Edge, Chrome, Firefox) and Microsoft Office apps.  
+- Client IPs for normal activity include internal and known external IPs such as 73.121.154.15, 172.221.112.235, 34.224.94.68, and some IPv6 addresses.  
+
+---  
+Suspicious Activity Discovered:  
+- Evidence of suspicious activity includes access to a file named "passwords.txt" by user jsteele@usculturaldynamics.com from IP 18.212.101.151 on 2024-08-06, which is unusual and potentially indicates credential harvesting or exfiltration.  
+- Multiple logins and mailbox accesses from diverse and geographically dispersed IP addresses, including some uncommon IPs such as 18.212.101.151, 54.219.139.191, 3.80.218.146, 52.108.181.1, 23.101.184.74, and 20.253.167.42.  
+- The presence of multiple conditional access policy changes with "DummyKnownNetworkPolicy" and "PC-Test" policies, possibly indicating policy manipulation to allow unauthorized access or bypass restrictions.  
+- No explicit brute force attack pattern (e.g., multiple failed login attempts) is visible in this log chunk, but the presence of multiple external IPs accessing the same user accounts with successful authentication suggests possible credential compromise or session hijacking.  
+- User "jsteele@usculturaldynamics.com" shows activity from multiple IPs including 73.121.154.15, 172.221.112.235, 18.212.101.151, 54.219.139.191, 3.80.218.146, 52.108.181.1, 23.101.184.74, and 20.253.167.42, which is unusual for a single user and may indicate account compromise or lateral movement.  
+- User "jkapoor@usculturaldynamics.com" also logs in from IP 34.224.94.68 and accesses mailboxes from that IP, which is consistent but should be verified if this IP is known/trusted.  
+
+---  
+IP Source Addresses Involved in Suspicious Activity:  
+- 18.212.101.151 (accessed suspicious file "passwords.txt")  
+- 54.219.139.191  
+- 3.80.218.146  
+- 52.108.181.1  
+- 23.101.184.74  
+- 20.253.167.42  
+- 172.221.112.235 (multiple successful logins and mailbox access for jsteele)  
+- 73.121.154.15 (multiple successful logins and mailbox access for jsteele)  
+- 34.224.94.68 (login and mailbox access for jkapoor)  
+
+---  
+User Account Names Involved in Suspicious Activity:  
+- jsteele@usculturaldynamics.com  
+- jkapoor@usculturaldynamics.com  
+
+---  
+Specific Log Data of Concern:  
+1. File Accessed:  
+   - UserId: jsteele@usculturaldynamics.com  
+   - ClientIP: 18.212.101.151  
+   - Operation: FileAccessed  
+   - SourceFileName: passwords.txt  
+   - CreationTime: 2024-08-06T19:25:51  
+   - ObjectId: https://usculturaldynamicsgmail-my.sharepoint.com/personal/jsteele_usculturaldynamics_com/Documents/Misc/passwords.txt  
+
+2. Multiple MailItemsAccessed and UserLoggedIn events for jsteele@usculturaldynamics.com from various IPs including 73.121.154.15, 172.221.112.235, 54.219.139.191, 3.80.218.146, 52.108.181.1, 23.101.184.74, 20.253.167.42.  
+
+3. Conditional Access Policy Changes:  
+   - Several Set-ConditionalAccessPolicy operations by NT AUTHORITY\SYSTEM modifying policies named "Known Networks List" and "PC-Test" with parameters indicating possible policy modifications.  
+   - Times range from 2024-07-14 to 2024-08-08.  
+
+4. UserLoggedIn events for jkapoor@usculturaldynamics.com from IP 34.224.94.68 with mailbox access following that.  
+
+---  
+Conclusion:  
+- The log shows no direct brute force attack evidence but reveals suspicious activity consistent with credential compromise or account misuse, especially for user jsteele@usculturaldynamics.com.  
+- The access to a file named "passwords.txt" from an external IP is a strong indicator of potential compromise or malicious insider activity.  
+- Multiple IP addresses accessing the same user account with successful authentication suggest possible session hijacking or compromised credentials.  
+- Conditional Access Policies have been modified multiple times, which could indicate an attacker attempting to weaken security controls.  
+- Immediate investigation and remediation are recommended, including:  
+  - Review and possibly reset credentials for the involved users.  
+  - Investigate the source and legitimacy of the suspicious IP addresses.  
+  - Audit and possibly revert recent Conditional Access Policy changes.  
+  - Conduct a thorough review of mailbox and file access logs for data exfiltration.  
+
+---  
+End of Report

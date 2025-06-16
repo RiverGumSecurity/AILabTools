@@ -1,0 +1,66 @@
+IncidentID: 20251206-152121  
+LogChunkID: 13/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful authentication events for users `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com` from various IP addresses, including both IPv4 and IPv6 addresses.
+- Regular mailbox and SharePoint operations such as mail item access, file access, list views, and mailbox configuration changes performed mostly by legitimate users.
+- Conditional Access Policies are being set and updated by system accounts (`NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)`), which is expected for Exchange service operations.
+- Use of modern authentication methods (OAuth, FormsCookieAuth) and client applications such as OWA, Edge, Chrome, OneDrive, and SharePoint Online Client Extensibility.
+- User logins show successful OAuth2 authorization flows with consistent user agents and device information.
+- No failed login attempts or authentication errors logged in this chunk.
+- Activity timestamps span from mid-July to mid-August 2024, showing ongoing normal user activity.
+
+---
+
+### Suspicious Activity Discovered
+
+- No explicit failed login attempts or brute force attempts are present in the provided logs.
+- No suspicious or anomalous IP addresses with failed authentication attempts.
+- No evidence of unusual or unauthorized changes to Conditional Access Policies; policies appear to be managed by system accounts.
+- No indications of account lockouts or multiple rapid authentication failures.
+- No suspicious user accounts outside the known user set.
+- No unusual geographic IP addresses or impossible travel events detected.
+- No suspicious token issuance or resource access patterns that deviate from normal user behavior.
+- No signs of compromised accounts based on the logs provided.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- None identified as suspicious in this log chunk.
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- None identified as suspicious in this log chunk.
+
+---
+
+### Specific Log Data of Concern
+
+- No specific log entries indicate compromise or suspicious activity in this dataset.
+
+---
+
+### Additional Notes
+
+- The logs show normal and expected activity for users `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com`.
+- System accounts are performing expected administrative operations.
+- All authentication events are successful with no failed attempts or suspicious patterns.
+- IP addresses such as `172.221.112.235`, `34.224.94.68`, `73.121.154.15`, `2600:387:f:6d1a::7`, and others appear multiple times with legitimate user activity.
+- No brute force or credential stuffing attacks are evident.
+- Recommend continuing monitoring for failed login attempts or unusual authentication patterns in other log chunks.
+
+---
+
+# Final Conclusion
+
+**No evidence of compromise or malicious activity was found in this log chunk.** The authentication and mailbox access activities appear consistent with normal user behavior and legitimate administrative operations.
+
+---
+
+If further log chunks are available, analysis of those may reveal additional context or suspicious activity.

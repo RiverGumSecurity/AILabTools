@@ -1,0 +1,137 @@
+Incident Analysis Report  
+=======================  
+IncidentID: 20251206-152849  
+LogChunkID: 38/55  
+
+---  
+
+### Summary of Normal Activity  
+- Multiple successful token issuance (GATFRTokenIssue) events for users `jsteele@usculturaldynamics.com`, `jkapoor@usculturaldynamics.com`, and `splanck@usculturaldynamics.com` across various Microsoft 365 services such as Exchange, Outlook, OneDrive, and SharePoint.  
+- Regular mailbox access (MailItemsAccessed) by legitimate users, primarily `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com`.  
+- Normal user login events with successful authentications from various IP addresses, including both IPv4 and IPv6 addresses.  
+- Administrative and system operations performed by `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)` related to mailbox plans, conditional access policies, and transport configurations. These appear routine and successful.  
+- User `jkapoor@usculturaldynamics.com` performed a password reset for user `jsteele@usculturaldynamics.com` on 2024-08-12, which was successful.  
+- File uploads, downloads, and page views consistent with normal user activity on OneDrive and SharePoint.  
+
+---  
+
+### Suspicious Activity Discovered  
+- There is a suspicious login failure event for user `jsteele@usculturaldynamics.com` on 2024-07-17 from IP `73.121.154.15` with error `UserStrongAuthEnrollmentRequiredInterrupt` (ErrorNumber: 50072). This indicates a failed login due to missing strong authentication enrollment.  
+- Despite the failed login, subsequent successful logins and mailbox accesses from the same IP `73.121.154.15` for user `jsteele@usculturaldynamics.com` occur, suggesting possible bypass or compromise.  
+- The IP address `172.221.112.235` is associated with multiple successful user login events and mailbox accesses for `jsteele@usculturaldynamics.com`. This IP is notable for repeated activity and should be reviewed for legitimacy.  
+- The password reset event executed by `jkapoor@usculturaldynamics.com` on `jsteele@usculturaldynamics.com` on 2024-08-12 could be legitimate but requires verification if it was authorized, as password resets are common post-compromise actions.  
+- No explicit brute force attack pattern (multiple failed logins from multiple IPs) is visible in this log chunk, but the failed login followed by successful logins from the same IP is suspicious.  
+- Several token issuances with empty or missing ClientIP fields may warrant further investigation, though not necessarily suspicious by themselves.  
+
+---  
+
+### IP Source Addresses Involved in Suspicious Activity  
+- 73.121.154.15 (Failed login followed by multiple successful logins and mailbox access for user `jsteele@usculturaldynamics.com`)  
+- 172.221.112.235 (Multiple successful logins and mailbox accesses for user `jsteele@usculturaldynamics.com`)  
+
+---  
+
+### User Account Names Involved in Suspicious Activity  
+- jsteele@usculturaldynamics.com (Failed login event with subsequent successful logins from suspicious IPs)  
+- jkapoor@usculturaldynamics.com (Performed password reset on `jsteele@usculturaldynamics.com`)  
+
+---  
+
+### Specific Log Data of Concern  
+
+1. Failed login event:  
+```json
+{
+  "CreationTime": "2024-07-17T19:00:24",
+  "Id": "d28e7e89-c6f4-463c-96d2-42a80a1d0000",
+  "Operation": "UserLoginFailed",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 15,
+  "ResultStatus": "Success",
+  "UserKey": "4e0ad150-8f74-4adb-a1fa-e9c10a6c4dfe",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "AzureActiveDirectory",
+  "ClientIP": "73.121.154.15",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "AzureActiveDirectoryEventType": 1,
+  "ExtendedProperties": [
+    {"Name": "ResultStatusDetail", "Value": "Success"},
+    {"Name": "UserAgent", "Value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; WebView/3.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.22631"},
+    {"Name": "UserAuthenticationMethod", "Value": "1"},
+    {"Name": "RequestType", "Value": "Login:login"}
+  ],
+  "ErrorNumber": "50072",
+  "LogonError": "UserStrongAuthEnrollmentRequiredInterrupt"
+}
+```
+
+2. Subsequent successful login and mailbox access from same IP:  
+```json
+{
+  "CreationTime": "2024-07-22T20:47:16",
+  "Id": "aaada935-46d9-43dd-9c18-50c14995ab00",
+  "Operation": "UserLoggedIn",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 15,
+  "ResultStatus": "Success",
+  "UserKey": "4e0ad150-8f74-4adb-a1fa-e9c10a6c4dfe",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "AzureActiveDirectory",
+  "ClientIP": "73.121.154.15",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "AzureActiveDirectoryEventType": 1,
+  "ExtendedProperties": [
+    {"Name": "ResultStatusDetail", "Value": "Success"},
+    {"Name": "UserAgent", "Value": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36"},
+    {"Name": "RequestType", "Value": "OAuth2:Authorize"}
+  ]
+}
+```
+
+3. Mailbox access from suspicious IP:  
+```json
+{
+  "CreationTime": "2024-07-19T19:59:08",
+  "Id": "cb5b1eb0-7c11-4c50-95f8-eba89756aade",
+  "Operation": "MailItemsAccessed",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 50,
+  "ResultStatus": "Succeeded",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIPAddress": "73.121.154.15",
+  "ClientInfoString": "Client=OWA;Action=ViaProxy",
+  "MailboxOwnerUPN": "jsteele@usculturaldynamics.com"
+}
+```
+
+4. Password reset event by `jkapoor@usculturaldynamics.com` on `jsteele@usculturaldynamics.com`:  
+```json
+{
+  "CreationTime": "2024-08-12T15:55:06",
+  "Id": "496833f3-2b43-45c1-aaae-71334a84e0a3",
+  "Operation": "Reset user password.",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 8,
+  "ResultStatus": "Success",
+  "UserId": "jkapoor@usculturaldynamics.com",
+  "ObjectId": "jsteele@usculturaldynamics.com"
+}
+```
+
+5. Multiple successful login and mailbox access events from IP `172.221.112.235` for user `jsteele@usculturaldynamics.com`.  
+
+---
+
+### Conclusion and Recommendations  
+- The failed login event with strong authentication error followed by successful logins from the same IP (`73.121.154.15`) is suspicious and may indicate an attempted bypass or exploitation of authentication controls.  
+- The IP addresses `73.121.154.15` and `172.221.112.235` should be investigated further for legitimacy and geolocation. If they are not recognized or authorized, consider blocking or applying conditional access policies.  
+- Verify the legitimacy of the password reset performed by `jkapoor@usculturaldynamics.com` on `jsteele@usculturaldynamics.com`. This could be a legitimate administrative action or a malicious activity if the account `jkapoor` is compromised.  
+- Review and enforce multi-factor authentication (MFA) policies to prevent bypass attempts.  
+- Conduct a full user account audit for `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com` to ensure no unauthorized changes or suspicious activities exist beyond this log chunk.  
+- Monitor for any further anomalous login attempts or unusual mailbox access patterns.  
+
+---
+
+If further log chunks are available, a broader correlation analysis is recommended to confirm attack patterns or lateral movement.

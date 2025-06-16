@@ -1,0 +1,62 @@
+Incident Analysis Report  
+=======================  
+IncidentID: 20251206-152919  
+LogChunkID: 39/55  
+
+---  
+Summary of Normal Activity:  
+- Multiple successful authentications and operations by legitimate users, primarily "jsteele@usculturaldynamics.com" and "jkapoor@usculturaldynamics.com".  
+- Activities include mail item access, file access, token issuance, mailbox configuration, and Teams session starts.  
+- Client IPs for normal activity include:  
+  - 73.121.154.15 (Windows10, Edge browser)  
+  - 172.221.112.235 (OWA, Android and Windows10 clients)  
+  - 3.80.218.146 (Exchange WebServices client)  
+  - 54.163.19.39 (Azure AD login event)  
+  - 52.108.181.1 (OneDrive file access)  
+  - 18.212.101.151 (SharePoint file access)  
+  - 2603:10b6:5:fe::10 and 2603:10b6:303:b2::5 (IPv6 addresses associated with jkapoor)  
+- System and service accounts (NT AUTHORITY\SYSTEM) perform mailbox and policy configurations as expected.  
+- No failed login attempts or suspicious authentication failures noted in this log chunk.  
+
+---  
+Suspicious Activity Discovered:  
+- No explicit failed login attempts or brute force patterns detected in this log chunk.  
+- No unusual or unknown usernames detected.  
+- No suspicious IP addresses outside the known user IPs.  
+- No evidence of unauthorized access or privilege escalation.  
+- Conditional Access Policies are being set to "Disabled" multiple times by SYSTEM account, which could be a concern if unexpected but no direct evidence of compromise here.  
+- All authentication events with IP addresses show successful logins by known users.  
+- No anomalous or unexpected user agents or client applications detected.  
+
+Conclusion:  
+- Based on this log chunk, there is no direct evidence of compromise or attack such as brute force, credential stuffing, or unauthorized access.  
+- The activity appears consistent with normal user behavior and administrative operations.  
+- The disabling of Conditional Access Policies by SYSTEM account should be reviewed in context of organizational policy but not necessarily malicious.  
+
+---  
+IP Source Addresses Involved in Suspicious Activity:  
+- None identified in this log chunk.  
+
+---  
+User Account Names Involved in Suspicious Activity:  
+- None identified in this log chunk.  
+
+---  
+Specific Log Data of Concern:  
+- Multiple "Set-ConditionalAccessPolicy" operations with "State":"Disabled" by NT AUTHORITY\SYSTEM:  
+  - Example:  
+    - CreationTime: 2024-08-06T10:27:47  
+    - Id: c4574a00-5e61-4ea2-374b-08dcb6026aeb  
+    - PolicyDetails: {"Version":0,"State":"Disabled"}  
+  - This may weaken security posture if done without proper authorization.  
+
+- No other suspicious log entries found in this chunk.  
+
+---  
+Recommendations:  
+- Review the context and authorization for disabling Conditional Access Policies.  
+- Continue monitoring for failed login attempts or unusual authentication patterns in other log chunks.  
+- Verify that all IP addresses used for authentication are recognized and authorized for these users.  
+- Maintain vigilance for any anomalous mailbox or file access activities in future logs.  
+
+If additional log chunks are available, further analysis may reveal more indicators of compromise.

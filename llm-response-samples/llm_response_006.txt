@@ -1,0 +1,82 @@
+IncidentID: 20251206-151913  
+LogChunkID: 7/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful authentication events for users `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com` are observed from various IPv6 and IPv4 addresses, including corporate and ISP-assigned ranges.
+- Activities include typical Exchange workload operations such as MailItemsAccessed, Send, FileAccessed, PageViewed, and GATFRTokenIssue (token issuance).
+- Conditional Access Policies are regularly updated by the system account `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)`.
+- User logins occur primarily from expected client applications (OWA, Edge, Chrome, OneDrive SyncEngine, Microsoft Teams Web Client) and from a variety of IP addresses consistent with user mobility.
+- No failed login attempts or explicit authentication failures are present in this log chunk.
+- The users `jsteele` and `jkapoor` show consistent access patterns with no obvious signs of account lockouts or throttling.
+
+---
+
+### Suspicious Activity Discovered
+
+- No explicit failed login attempts or brute force attempts are logged in this chunk.
+- However, there are multiple successful user login events from geographically and network-wise disparate IP addresses within short timeframes, which may indicate account compromise or session hijacking:
+  - `jsteele@usculturaldynamics.com` logged in from:
+    - IPv6: `2600:387:f:6d1a::7` (Windows10, Edge browser)
+    - IPv4: `18.212.101.151` (Windows10, Chrome browser)
+    - IPv4: `3.80.218.146` (Windows10, Edge browser)
+    - IPv4: `73.121.154.15` (Android, Chrome browser)
+    - IPv4: `172.221.112.235` (Windows10, Edge browser)
+    - IPv6: `2603:1036:2404::23` (OneNote client)
+    - IPv6: `2600:387:15:1f16::b` (OWA client)
+    - IPv6: `2600:387:f:818::4` (OWA client)
+  - The diversity of IP addresses and platforms within a short period could be suspicious if these IPs are from unrelated geographies or networks.
+- No evidence of brute force attacks or failed attempts in this log chunk.
+- No suspicious modifications or privilege escalations detected in this chunk.
+- Conditional Access Policies are being updated regularly by system accounts, which appears normal.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- 18.212.101.151  
+- 3.80.218.146  
+- 73.121.154.15  
+- 172.221.112.235  
+- 2600:387:f:6d1a::7  
+- 2600:387:15:1f16::b  
+- 2600:387:f:818::4  
+- 2603:1036:2404::23  
+
+*Note: These IPs are associated with successful logins for `jsteele`. The presence of multiple distinct IPs in a short time frame could indicate suspicious activity.*
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- `jsteele@usculturaldynamics.com`  
+- `jkapoor@usculturaldynamics.com` (less suspicious, consistent IP usage)  
+
+---
+
+### Specific Log Data of Concern
+
+- Multiple `UserLoggedIn` operations with `ResultStatus: Success` for `jsteele@usculturaldynamics.com` from varying IP addresses:
+
+  - 2024-07-23T11:59:50 from `2600:387:f:6d1a::7` (Windows10, Edge)  
+  - 2024-08-06T19:25:24 from `18.212.101.151` (Windows10, Chrome)  
+  - 2024-08-07T23:03:25 from `3.80.218.146` (Windows10, Edge)  
+  - 2024-07-25T18:07:05 to 2024-08-12 multiple accesses from `73.121.154.15` and `172.221.112.235` (Windows10, Edge and Android Chrome)  
+  - 2024-08-08T16:11:34 FileModifiedExtended from `2603:1036:2404::23` (OneNote client)  
+
+- These IP addresses are used for various operations including mail access, file access, and page views, indicating active sessions.
+
+---
+
+### Conclusion
+
+- No direct evidence of brute force attack or failed login attempts in this log chunk.
+- However, the user `jsteele@usculturaldynamics.com` exhibits login activity from multiple geographically and network-wise diverse IP addresses in a short time frame, which is suspicious and may indicate account compromise or session hijacking.
+- Given that these IPs have successful authentications and active mailbox/file access, this activity should be considered potentially malicious.
+- Recommend further investigation on the IP addresses for geolocation and reputation, review of recent user activity for anomalies, and possible password reset and multi-factor authentication enforcement for affected accounts.
+
+---
+
+If further log chunks are available, analysis of failed login attempts or other suspicious events should be performed to confirm or refute compromise hypotheses.

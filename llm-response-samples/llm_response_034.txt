@@ -1,0 +1,65 @@
+Incident Analysis Report  
+=======================
+
+IncidentID: 20251206-152807  
+LogChunkID: 35/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple users authenticated successfully to Microsoft 365 services, primarily Exchange and OneDrive workloads.
+- Regular mailbox access and file access operations were performed by legitimate users.
+- Conditional Access Policies were set and modified by system accounts (NT AUTHORITY\SYSTEM).
+- Users involved in normal activity include:  
+  - jsteele@usculturaldynamics.com  
+  - jkapoor@usculturaldynamics.com  
+  - jleary@usculturaldynamics.com  
+  - splanck@usculturaldynamics.com  
+- Successful token issues (GATFRTokenIssue) and user logins were recorded with expected client applications and IP addresses.
+- Client IP addresses for normal activity include a range of IPv4 and IPv6 addresses, mostly consistent with corporate or known user locations.
+
+---
+
+### Suspicious Activity Discovered
+
+- There is no explicit evidence of brute force attacks or failed login attempts in this log chunk.
+- No repeated failed authentication attempts or unusual spikes in authentication failures detected.
+- No suspicious or unknown usernames used for authentication.
+- No unusual or blacklisted IP addresses observed.
+- All IP addresses associated with successful authentications appear legitimate and consistent with user activity.
+- No evidence of token issuance or login from suspicious or anomalous IPs.
+- No signs of privilege escalation or unauthorized policy changes by non-system accounts.
+- No evidence of compromised accounts or unauthorized access.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- None identified in this log chunk.
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- None identified in this log chunk.
+
+---
+
+### Specific Log Data of Concern
+
+- No specific log entries indicate compromise or suspicious activity in this provided data.
+
+---
+
+### Conclusion
+
+Based on the analysis of the provided Microsoft 365 Unified Audit logs for IncidentID 20251206-152807 and LogChunkID 35/55, there is no evidence of compromise or malicious activity. The authentication and access patterns appear consistent with normal user behavior and administrative operations.
+
+---
+
+If additional log chunks or data are available, further analysis is recommended to confirm the overall security posture.
+
+---
+
+End of Report

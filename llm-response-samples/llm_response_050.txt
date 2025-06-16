@@ -1,0 +1,127 @@
+IncidentID: 20251206-153348  
+LogChunkID: 51/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful mailbox plan and conditional access policy changes performed by the system account `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)`, indicating routine administrative or system maintenance activity.
+- Regular successful user logins by known users `jkapoor@usculturaldynamics.com` and `jsteele@usculturaldynamics.com` from various IP addresses, including both IPv4 and IPv6 addresses.
+- Frequent successful token issuance (`GATFRTokenIssue`) events for these users, indicating normal OAuth token refresh or issuance.
+- Mailbox access and mail item operations (access, send, move to deleted items) by legitimate users, consistent with normal user activity.
+- Creation and modification of service principals and conditional access policies appear to be performed by system or internal Azure AD services.
+- User agents and devices correspond to expected platforms (Windows 10, Android, browsers like Edge, Chrome, Firefox).
+
+---
+
+### Suspicious Activity Discovered
+
+- No explicit brute force or failed login attempts are present in this log chunk.
+- No evidence of failed login storms or repeated authentication failures from any IP addresses.
+- No unknown or suspicious user accounts attempting authentication.
+- However, there is a notable login from IP address `3.80.218.146` for user `jsteele@usculturaldynamics.com` which is not seen frequently in other logs.
+- Another login from IP `54.163.19.39` with `UserId` as `Not Available` but with successful authentication event type `SAS:EndAuth` could be suspicious and requires further investigation.
+- The user `jsteele@usculturaldynamics.com` has multiple mailbox accesses and mail sends from IPs including `172.221.112.235`, `73.121.154.15`, `13.57.246.62`, `18.212.101.151`, and `54.163.19.39`. Some of these IPs are diverse and geographically distributed, which may be unusual depending on the user's normal location.
+- The presence of multiple conditional access policy changes disabling or modifying policies (e.g., "Default Policy" set to "Disabled") by system account could be a concern if these changes were unauthorized or unexpected.
+- The creation of a service principal with extensive permissions and addresses related to OneNote cloud services might be normal but should be verified for legitimacy.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- 3.80.218.146 (successful login for user `jsteele@usculturaldynamics.com`)
+- 54.163.19.39 (successful login event with `UserId` as `Not Available`)
+- 13.57.246.62 (mailbox accessed by `jsteele@usculturaldynamics.com`)
+- 18.212.101.151 (successful login for user `jsteele@usculturaldynamics.com`)
+- 73.121.154.15 (multiple successful logins for user `jsteele@usculturaldynamics.com`)
+- 172.221.112.235 (multiple mailbox accesses and logins for `jsteele@usculturaldynamics.com`)
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- `jsteele@usculturaldynamics.com` (multiple logins and mailbox accesses from diverse IPs)
+- `Not Available` (ambiguous user ID with successful login from IP `54.163.19.39`)
+
+---
+
+### Specific Log Data of Concern
+
+1. **Suspicious Login from IP 3.80.218.146**  
+```
+{
+  "CreationTime": "2024-08-06T21:02:31",
+  "Id": "5cee0bc6-722f-4493-867a-5382f21b7500",
+  "Operation": "UserLoggedIn",
+  "ResultStatus": "Success",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "3.80.218.146",
+  "UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0"
+}
+```
+
+2. **Suspicious Login with UserId 'Not Available' from IP 54.163.19.39**  
+```
+{
+  "CreationTime": "2024-08-06T19:10:42",
+  "Id": "88cf1bf5-0f47-473c-9560-c7f598188300",
+  "Operation": "UserLoggedIn",
+  "ResultStatus": "Success",
+  "UserId": "Not Available",
+  "ClientIP": "54.163.19.39",
+  "RequestType": "SAS:EndAuth",
+  "UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0"
+}
+```
+
+3. **Multiple Conditional Access Policy Changes Disabling Default Policy**  
+```
+{
+  "CreationTime": "2024-08-10T16:32:56",
+  "Operation": "Set-ConditionalAccessPolicy",
+  "ResultStatus": "True",
+  "UserId": "NT AUTHORITY\\SYSTEM (Microsoft.Exchange.ServiceHost)",
+  "Parameters": [
+    {"Name": "PolicyDetails", "Value": "{\"Version\":0,\"State\":\"Disabled\"}"},
+    {"Name": "DisplayName", "Value": "Default Policy"}
+  ]
+}
+```
+(Similar events on 2024-07-16, 2024-07-24, 2024-07-26)
+
+4. **Multiple Mailbox Accesses and Mail Sends by `jsteele@usculturaldynamics.com` from Various IPs**  
+Example:  
+```
+{
+  "CreationTime": "2024-08-07T23:58:04",
+  "Operation": "MailItemsAccessed",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIPAddress": "172.221.112.235",
+  "ResultStatus": "Succeeded"
+}
+```
+and  
+```
+{
+  "CreationTime": "2024-07-23T11:54:12",
+  "Operation": "Send",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIPAddress": "73.121.154.15",
+  "ResultStatus": "Succeeded"
+}
+```
+
+---
+
+### Conclusion
+
+- No direct evidence of brute force attack or failed login attempts in this log chunk.
+- However, the presence of successful logins from multiple geographically diverse IP addresses for the same user (`jsteele@usculturaldynamics.com`), including an ambiguous user login (`Not Available`), and multiple disabling of conditional access policies could indicate a potential compromise or misuse.
+- The IP addresses involved in these successful logins and mailbox accesses should be investigated further for geolocation and reputation.
+- The conditional access policy changes disabling security controls are suspicious and should be validated with the security team to confirm if authorized.
+- Recommend immediate review of the user account `jsteele@usculturaldynamics.com` for unusual activity, password reset, and multi-factor authentication enforcement.
+- Review and audit conditional access policies and service principal changes for unauthorized modifications.
+
+---
+
+If further log chunks are available, correlate these IP addresses and user activities for a broader view of potential compromise.

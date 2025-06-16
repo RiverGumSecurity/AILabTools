@@ -1,0 +1,135 @@
+Incident Analysis Report  
+IncidentID: 20251206-153323  
+LogChunkID: 50/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful user activities by legitimate users, primarily `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com`.
+- Normal operations include mailbox item access, file sync/download, page views in SharePoint and OneDrive, mailbox permission changes, mailbox plan settings, and conditional access policy updates by system accounts.
+- The majority of activities originate from consistent IP addresses such as `172.221.112.235`, `73.121.154.15`, `2603:10b6:5:fe::10`, `2603:10b6:5:22a::19`, `34.224.94.68`, and some other IPv6 addresses.
+- System-level operations (`NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)`) are seen performing routine configuration and policy management tasks.
+- Authentication types observed include OAuth, FormsCookieAuth, and some token-based authentications, all with successful results.
+- No failed login attempts or suspicious authentication failures are noted in this log chunk.
+- Conditional Access Policies are being set and updated, mostly by system accounts, with some policies disabled or modified.
+
+---
+
+### Suspicious Activity Discovered
+
+- No explicit brute force or repeated failed login attempts are observed in this log chunk.
+- However, there are multiple instances of "Set-ConditionalAccessPolicy" operations performed by the system account (`NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)`) that show disabling of policies (e.g., Default Policy is disabled multiple times).
+- The disabling of Conditional Access Policies, especially the "Default Policy" which is likely a security baseline, could indicate a potential attacker or insider tampering with security controls to weaken protections.
+- The "Known Networks List" policy is also modified multiple times.
+- The user `jsteele@usculturaldynamics.com` performs multiple mailbox operations including moving emails to deleted items, soft deletes, and mailbox rule creations. While these could be normal, the volume and nature of mailbox modifications (including deletion of emails with suspicious subjects related to security and IT outages) could indicate mailbox manipulation or data exfiltration.
+- The client IP `172.221.112.235` is associated with many of these mailbox access and modification events.
+- There is no direct evidence of brute force attacks or failed authentication attempts in this chunk, but the policy changes and mailbox manipulations are suspicious and could be part of a compromise.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- `172.221.112.235` — Frequent source of mailbox access, mailbox item deletion, page views, and user login events for `jsteele@usculturaldynamics.com`.
+- `73.121.154.15` — Source of multiple mailbox create and move operations for `jsteele@usculturaldynamics.com`.
+- `2600:387:15:1f16::b` — Source IP for mailbox item deletion by `jsteele@usculturaldynamics.com`.
+- `3.80.218.146` — Source IP for SharePoint list views and mailbox access by `jsteele@usculturaldynamics.com`.
+- Note: The system account operations originate from internal Exchange servers and are considered normal for system management but the frequent disabling of policies is suspicious.
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- `jsteele@usculturaldynamics.com` — Primary user involved in mailbox access, mailbox item deletions, mailbox rule creation, and SharePoint/OneDrive activity. The volume and nature of mailbox deletions and rule creation are suspicious.
+- `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)` — System account performing multiple Conditional Access Policy changes, including disabling security policies.
+- `jkapoor@usculturaldynamics.com` — Appears in normal mailbox access and some mailbox operations, no suspicious activity directly linked in this log chunk.
+
+---
+
+### Specific Log Data of Concern
+
+1. **Disabling of Conditional Access Policies by System Account**  
+   - Multiple entries show `Set-ConditionalAccessPolicy` with `ResultStatus: True` and `PolicyDetails` indicating `"State":"Disabled"` for the "Default Policy".  
+   - Example:  
+     ```
+     CreationTime: 2024-08-02T11:50:20  
+     UserId: NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)  
+     Operation: Set-ConditionalAccessPolicy  
+     ResultStatus: True  
+     PolicyDetails: {"Version":0,"State":"Disabled"}  
+     DisplayName: Default Policy
+     ```
+   - Similar disabling events on 2024-07-31, 2024-08-07, 2024-08-10, 2024-07-18, 2024-07-22, 2024-07-15, 2024-07-19.
+
+2. **Mailbox Item Deletions and Moves by `jsteele@usculturaldynamics.com`**  
+   - SoftDelete and MoveToDeletedItems operations on mailbox items with suspicious or security-related email subjects:  
+     - Subjects like "Bad CrowdStrike Update Linked to Major IT Outages Worldwide", "Black Hat preview: AI and cloud security take center stage", "What happens when the ransomware actor wins?", and others.  
+   - Example:  
+     ```
+     CreationTime: 2024-08-06T15:14:30  
+     Operation: SoftDelete  
+     UserId: jsteele@usculturaldynamics.com  
+     ClientIP: 172.221.112.235  
+     ResultStatus: Succeeded  
+     ```
+   - Multiple MoveToDeletedItems operations on 2024-07-23, 2024-07-19, 2024-08-08.
+
+3. **Mailbox Rule Creation by `jsteele@usculturaldynamics.com`**  
+   - Creation of inbox rule named "SANS Mail" that deletes emails from `sans@email.sans.org` and stops processing other rules. This could be an attempt to hide incoming emails from a security organization.  
+   - Example:  
+     ```
+     CreationTime: 2024-07-22T12:37:40  
+     Operation: Set-InboxRule  
+     UserId: jsteele@usculturaldynamics.com  
+     Parameters: From = sans@email.sans.org, StopProcessingRules = True  
+     ResultStatus: True
+     ```
+
+4. **Successful User Login by `jsteele@usculturaldynamics.com` from IP `172.221.112.235`**  
+   - Indicates that the user account is active and being used from this IP.  
+   - Example:  
+     ```
+     CreationTime: 2024-08-11T23:43:36  
+     Operation: UserLoggedIn  
+     UserId: jsteele@usculturaldynamics.com  
+     ClientIP: 172.221.112.235  
+     ResultStatus: Success
+     ```
+
+---
+
+### Conclusion
+
+- **Type of Attack/Compromise:**  
+  The evidence suggests a **compromise of the user account `jsteele@usculturaldynamics.com`**, likely involving **insider or attacker activity to disable security policies and manipulate mailbox contents** to hide traces or exfiltrate data. This includes disabling Conditional Access Policies and creating mailbox rules to delete or hide security-related emails.
+
+- **No brute force attacks or failed login attempts are visible in this log chunk.** However, the disabling of security policies and mailbox manipulations are strong indicators of malicious activity.
+
+---
+
+# Summary
+
+| Category                         | Details                                                                                      |
+|---------------------------------|----------------------------------------------------------------------------------------------|
+| IncidentID                      | 20251206-153323                                                                              |
+| LogChunkID                     | 50/55                                                                                       |
+| Type of Attack/Compromise       | Account compromise with security policy tampering and mailbox manipulation                   |
+| Usernames involved              | - jsteele@usculturaldynamics.com<br>- NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)   |
+| Suspicious IP addresses         | - 172.221.112.235<br>- 73.121.154.15<br>- 2600:387:15:1f16::b<br>- 3.80.218.146               |
+| Suspicious Activities           | - Disabling Conditional Access Policies<br>- Mailbox item deletion and moves<br>- Malicious inbox rule creation |
+| Evidence of successful auth by suspicious IPs | Yes, `172.221.112.235` and `73.121.154.15` show successful mailbox access and modifications |
+
+---
+
+# Recommended Actions
+
+- Immediately investigate and suspend the account `jsteele@usculturaldynamics.com`.
+- Review and restore Conditional Access Policies to secure defaults.
+- Audit mailbox rules and deleted items for further malicious content or exfiltration.
+- Conduct a full compromise assessment on the user and related systems.
+- Reset credentials and enforce MFA on all accounts.
+- Monitor for further suspicious activity from the identified IP addresses.
+
+---
+
+If you require further analysis or correlation with other log chunks, please advise.

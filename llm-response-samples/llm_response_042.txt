@@ -1,0 +1,111 @@
+Incident Analysis Report  
+========================  
+IncidentID: 20251206-153051  
+LogChunkID: 43/55  
+
+---  
+
+### Summary of Normal Activity  
+- Multiple successful authentication events for users `jkapoor@usculturaldynamics.com` and `jsteele@usculturaldynamics.com` from various IP addresses, including `34.224.94.68`, `73.121.154.15`, `172.221.112.235`, `2600:387:f:81b::1`, `3.80.218.146`, `13.57.246.62`, and others.  
+- Routine mailbox operations such as mail access, mailbox configuration changes, mailbox plan settings, and token issuance for these users.  
+- Conditional Access Policies and mailbox policies being set by system accounts (NT AUTHORITY\SYSTEM), which is typical for Exchange service operations.  
+- Some SharePoint and OneDrive file and page access by `jsteele@usculturaldynamics.com` from internal IPs.  
+- Presence of a phishing email detected and moved to Junk folder, indicating active threat intelligence and filtering.  
+
+### Suspicious Activity Discovered  
+- Multiple failed login attempts (UserLoginFailed) for user `jsteele@usculturaldynamics.com` from IP `3.80.218.146` with error `InvalidUserNameOrPassword`.  
+- Despite failed login attempts from `3.80.218.146`, there are also successful login events from the same IP for user `jsteele@usculturaldynamics.com`. This indicates possible brute force or credential stuffing attempts that eventually succeeded.  
+- Creation of a suspicious inbox rule named "SANS Mail" by `jsteele@usculturaldynamics.com` that moves emails containing header `X-MS-Exchange-Inbox-Rules-Loop: *@sans.org` to a folder named "Cyber Resources" and stops processing further rules. This could be an attacker trying to hide or redirect certain emails.  
+- Multiple conditional access policies being set or modified, including disabling of default policies, which might indicate policy tampering to weaken security controls.  
+- The presence of a phishing email targeting `jsteele@usculturaldynamics.com` with spoofed external domain and DMARC failure, indicating an active phishing threat.  
+
+### IP Source Addresses Involved in Suspicious Activity  
+- `3.80.218.146` (failed and successful login for `jsteele@usculturaldynamics.com`)  
+- `73.121.154.15` (consistent logins for `jsteele@usculturaldynamics.com`, possibly legitimate but worth monitoring)  
+- No clear evidence of brute force from other IPs in this log chunk, but `3.80.218.146` stands out due to failed then successful logins.  
+
+### User Account Names Involved in Suspicious Activity  
+- `jsteele@usculturaldynamics.com` (failed logins, suspicious inbox rule creation, phishing email recipient)  
+- No suspicious activity directly linked to `jkapoor@usculturaldynamics.com` in this log chunk.  
+
+### Specific Log Data of Concern  
+
+1. Failed login followed by successful login from same IP:  
+```json
+{
+  "CreationTime": "2024-08-12T16:00:57",
+  "Operation": "UserLoginFailed",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "3.80.218.146",
+  "ResultStatus": "Success",
+  "LogonError": "InvalidUserNameOrPassword"
+},
+{
+  "CreationTime": "2024-08-09T20:57:20",
+  "Operation": "UserLoggedIn",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "3.80.218.146",
+  "ResultStatus": "Success"
+}
+```
+
+2. Suspicious inbox rule creation by `jsteele@usculturaldynamics.com`:  
+```json
+{
+  "CreationTime": "2024-07-17T19:24:32",
+  "Operation": "New-InboxRule",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "73.121.154.15",
+  "Parameters": [
+    {"Name": "MoveToFolder", "Value": "Cyber Resources"},
+    {"Name": "Name", "Value": "SANS Mail"},
+    {"Name": "HeaderContainsWords", "Value": "X-MS-Exchange-Inbox-Rules-Loop: *@sans.org"},
+    {"Name": "StopProcessingRules", "Value": "True"}
+  ]
+}
+```
+
+3. Conditional Access Policy modifications disabling default policies:  
+```json
+{
+  "CreationTime": "2024-07-31T00:58:18",
+  "Operation": "Set-ConditionalAccessPolicy",
+  "ResultStatus": "True",
+  "UserId": "NT AUTHORITY\\SYSTEM (Microsoft.Exchange.ServiceHost)",
+  "Parameters": [
+    {"Name": "Identity", "Value": "USCulturalDynamicsgmail.onmicrosoft.com\\d8e4c2a2-d527-413a-ae45-4fbf36cc13c6"},
+    {"Name": "PolicyDetails", "Value": "{\"Version\":0,\"State\":\"Disabled\"}"}
+  ]
+}
+```
+
+4. Phishing email detected targeting `jsteele@usculturaldynamics.com`:  
+```json
+{
+  "CreationTime": "2024-07-24T16:21:23",
+  "Operation": "TIMailData",
+  "UserId": "ThreatIntel",
+  "Recipients": ["jsteele@usculturaldynamics.com"],
+  "PhishConfidenceLevel": "Normal",
+  "Policy": "Spoof",
+  "Verdict": "Phish",
+  "SenderIp": "199.15.214.48",
+  "Subject": "Revolutionizing Network Security: Achieving Real-Time Threat Prevention"
+}
+```
+
+---
+
+### Conclusion  
+The logs indicate a likely brute force or credential stuffing attack against user `jsteele@usculturaldynamics.com` from IP `3.80.218.146`, which resulted in successful authentication. Post-compromise activity includes creation of a suspicious inbox rule to potentially hide or redirect emails, and disabling of default conditional access policies, which weakens security posture. Additionally, a phishing email targeting this user was detected and quarantined.  
+
+Immediate actions recommended:  
+- Investigate and block IP `3.80.218.146` if not recognized.  
+- Review and remove suspicious inbox rules for `jsteele@usculturaldynamics.com`.  
+- Audit and restore conditional access policies to secure defaults.  
+- Force password reset and enable multi-factor authentication (MFA) for `jsteele@usculturaldynamics.com`.  
+- Conduct a thorough mailbox and environment review for further indicators of compromise.  
+
+---
+
+Report prepared by SOC Incident Response Team.

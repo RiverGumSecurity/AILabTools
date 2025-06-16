@@ -1,0 +1,130 @@
+Incident Analysis Report  
+=======================
+
+IncidentID: 20251206-151849  
+LogChunkID: 6/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful token issuance (GATFRTokenIssue) events for users `jsteele@usculturaldynamics.com`, `jkapoor@usculturaldynamics.com`, and `gwootton@usculturaldynamics.com` without associated client IP addresses, typical for internal or trusted token refresh operations.
+- Regular mailbox and mail item access by users `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com` from various IP addresses including `172.221.112.235`, `73.121.154.15`, `34.224.94.68`, `2603:10b6:303:71::13`, and others.
+- Conditional Access Policies are being set and updated by system accounts (`NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)`), reflecting normal administrative maintenance.
+- User logins with success status from known IPs and typical user agents (Windows 10, Chrome, Edge, Firefox) for users `jsteele` and `jkapoor`.
+- SharePoint and Exchange operations such as file access, list views, mailbox plan settings, and label applications are consistent with normal user activity.
+
+---
+
+### Suspicious Activity Discovered
+
+- Presence of a **UserLoginFailed** event for user `jsteele@usculturaldynamics.com` from IP address `54.219.139.191` with error `SsoArtifactRevoked` (error number 50133). This indicates a failed login attempt due to revoked Single Sign-On token artifact.
+- The same IP address `54.219.139.191` also shows **successful** mailbox access and login events for user `jsteele@usculturaldynamics.com` shortly after the failed login, indicating possible brute force or credential stuffing attempts that succeeded.
+- Multiple distinct IP addresses are observed accessing the same user accounts, including some from geographically diverse locations and IPv6 addresses, which may be unusual depending on the organization's user base.
+- No explicit brute force failure bursts are logged in this chunk, but the failed login followed by successful login from the same suspicious IP suggests a possible targeted attack.
+- No evidence of new user creation or privilege escalation in this chunk, but the access from suspicious IPs to mailbox data is concerning.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- `54.219.139.191`  
+  - Failed login followed by successful login and mailbox access for user `jsteele@usculturaldynamics.com`.
+- Other IPs are mostly consistent with normal activity but should be monitored for unusual patterns:
+  - `172.221.112.235`
+  - `73.121.154.15`
+  - `34.224.94.68`
+  - `2603:10b6:303:71::13`
+  - `2603:10b6:5:fe::10`
+  - `2600:387:15:1f16::b`
+  - `18.212.101.151`
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- `jsteele@usculturaldynamics.com`  
+  - Target of failed and successful login attempts from suspicious IP `54.219.139.191`.
+- `jkapoor@usculturaldynamics.com`  
+  - No direct suspicious login failures but active in mailbox access and administrative changes.
+- `gwootton@usculturaldynamics.com`  
+  - No suspicious activity noted in this chunk.
+
+---
+
+### Specific Log Data of Concern
+
+```json
+{
+  "CreationTime": "2024-08-12T15:55:57",
+  "Id": "4243bf37-7e4d-4922-ad8f-b78892b48e00",
+  "Operation": "UserLoginFailed",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 15,
+  "ResultStatus": "Success",
+  "UserKey": "4e0ad150-8f74-4adb-a1fa-e9c10a6c4dfe",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "AzureActiveDirectory",
+  "ClientIP": "54.219.139.191",
+  "ObjectId": "00000002-0000-0ff1-ce00-000000000000",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "AzureActiveDirectoryEventType": 1,
+  "ExtendedProperties": [
+    {"Name": "ResultStatusDetail", "Value": "Success"},
+    {"Name": "UserAgent", "Value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0 OS/10.0.20348"},
+    {"Name": "RequestType", "Value": "OAuth2:Authorize"}
+  ],
+  "ErrorNumber": "50133",
+  "LogonError": "SsoArtifactRevoked"
+},
+{
+  "CreationTime": "2024-08-07T23:12:41",
+  "Id": "5b879665-6693-4f4e-a232-f729d5fa9ee8",
+  "Operation": "MailItemsAccessed",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 50,
+  "ResultStatus": "Succeeded",
+  "UserKey": "10032003A6A72A25",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "Exchange",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "AppId": "00000002-0000-0ff1-ce00-000000000000",
+  "ClientAppId": "00000002-0000-0ff1-ce00-000000000000",
+  "ClientIPAddress": "54.219.139.191",
+  "ClientInfoString": "Client=OWA;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0;",
+  "ExternalAccess": false,
+  "InternalLogonType": 0,
+  "LogonType": 0,
+  "LogonUserSid": "S-1-5-21-1350491342-3630794113-937186470-29913992",
+  "MailboxGuid": "fcfcfbe0-e4f3-484f-ac65-d761fd805692",
+  "MailboxOwnerSid": "S-1-5-21-1350491342-3630794113-937186470-29913992",
+  "MailboxOwnerUPN": "jsteele@usculturaldynamics.com",
+  "OperationProperties": [
+    {"Name": "MailAccessType", "Value": "Bind"},
+    {"Name": "IsThrottled", "Value": "False"}
+  ],
+  "OrganizationName": "USCulturalDynamicsgmail.onmicrosoft.com",
+  "OriginatingServer": "DM6PR04MB5129 (15.20.4200.000)",
+  "SessionId": "cd6a49f5-324e-401c-affb-7caa4b57b09d"
+}
+```
+
+---
+
+### Conclusion and Recommendations
+
+- The logs show evidence of a suspicious login failure followed by successful mailbox access from the same IP address `54.219.139.191` for user `jsteele@usculturaldynamics.com`. This pattern is indicative of a possible brute force or credential stuffing attack that succeeded.
+- The IP `54.219.139.191` should be considered malicious and blocked or further investigated.
+- User `jsteele@usculturaldynamics.com`'s account may be compromised and should be immediately reviewed:
+  - Force a password reset.
+  - Review mailbox and SharePoint access logs for any unauthorized data access or exfiltration.
+  - Enable or review multi-factor authentication (MFA) enforcement.
+- Review Conditional Access Policies to ensure they are appropriately restrictive and monitor for any unauthorized policy changes.
+- Continue monitoring all login attempts, especially from unusual IP addresses or geographic locations.
+- Conduct a broader investigation on other log chunks for similar suspicious patterns.
+
+---
+
+End of Report

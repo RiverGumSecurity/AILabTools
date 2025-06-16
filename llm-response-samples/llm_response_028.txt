@@ -1,0 +1,80 @@
+Incident Analysis Report  
+IncidentID: 20251206-152602  
+LogChunkID: 29/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful token issuance (GATFRTokenIssue) events for users `jkapoor@usculturaldynamics.com` and `jsteele@usculturaldynamics.com` without associated client IPs in many cases, which is typical for internal or trusted token refresh operations.
+- Regular mailbox access (MailItemsAccessed) by legitimate users `jsteele@usculturaldynamics.com`, `nreynell@usculturaldynamics.com`, and `jkapoor@usculturaldynamics.com` from various IP addresses, mostly consistent with normal business operations.
+- File and folder operations in OneDrive and SharePoint by `jsteele@usculturaldynamics.com` and system/service accounts, consistent with normal user activity.
+- Conditional Access Policy and Mailbox Plan changes performed by system accounts (`NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)`), which appear routine and authorized.
+- Successful user login events (UserLoggedIn) for `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com` from multiple IP addresses including IPv4 and IPv6 addresses, showing normal user authentication activity.
+- Use of various client applications such as OWA, OneDrive Web App, OneNote, MSWACONSync, and others consistent with normal user behavior.
+
+---
+
+### Suspicious Activity Discovered
+
+- No explicit failed login attempts or brute force attack patterns (e.g., multiple failed attempts followed by success) are visible in this log chunk.
+- However, there is a notable presence of multiple IP addresses used by user `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com` for successful authentications, including some external IPs that might be unusual or require verification for legitimacy.
+- The IP address `34.224.94.68` used by `jkapoor@usculturaldynamics.com` is notable as it appears in both successful token issuance and successful login, and also used for sending emails. This IP should be verified for legitimacy.
+- The IP address `73.121.154.15` used by `jsteele@usculturaldynamics.com` is also seen in multiple successful login and mailbox access events, including file uploads and page views. This IP should be verified.
+- Several Conditional Access Policies have been set or disabled by system accounts. The disabling of the "Default Policy" and changes to "PC-Test" policy could indicate policy weakening or misconfiguration that might allow unauthorized access.
+- No direct evidence of brute force or credential stuffing attacks is found in this chunk, but the presence of multiple external IPs with successful authentication suggests possible compromised credentials or session hijacking.
+- The presence of OAuth token issuance and usage from multiple IPs and devices for the same user may indicate token theft or session replay attacks if these IPs are not recognized.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- 34.224.94.68 (used by jkapoor@usculturaldynamics.com for login, token issuance, and sending mail)
+- 73.121.154.15 (used by jsteele@usculturaldynamics.com for login, mailbox access, file upload, page views)
+- 3.80.218.146 (used by jsteele@usculturaldynamics.com for mailbox access)
+- 2600:387:f:6d1a::7 (IPv6 used by jsteele@usculturaldynamics.com for login)
+- 172.221.112.235 (used by jsteele@usculturaldynamics.com for login and mailbox access)
+- 2603:10b6:5:fe::10 and other IPv6 addresses associated with jsteele@usculturaldynamics.com (multiple mailbox access events)
+
+Note: These IPs should be checked against known threat intelligence sources and internal IP whitelists.
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- jkapoor@usculturaldynamics.com
+- jsteele@usculturaldynamics.com
+
+---
+
+### Specific Log Data of Concern
+
+1. Multiple `Set-ConditionalAccessPolicy` operations disabling or modifying policies by `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)`:
+   - Example disabling "Default Policy" on 2024-07-20T03:30:26 and 2024-07-25T22:07:24.
+   - Modifications to "PC-Test" policy on 2024-07-24 and 2024-07-29.
+
+2. Successful login and token issuance from external IPs:
+   - `jkapoor@usculturaldynamics.com` from IP `34.224.94.68` on 2024-08-08T01:17:33 (UserLoggedIn).
+   - `jsteele@usculturaldynamics.com` from IP `73.121.154.15` on multiple occasions including 2024-07-19T11:30:31 and 2024-07-23T12:01:33.
+   - `jsteele@usculturaldynamics.com` from IP `3.80.218.146` on 2024-08-09T14:14:17 (MailItemsAccessed).
+
+3. Email send operation by `jkapoor@usculturaldynamics.com` from IP `34.224.94.68` on 2024-08-07T13:32:35 with subject "Fw: Your First SANS Course" which could be a phishing or spam email if unauthorized.
+
+4. Multiple mailbox access and file operations by `jsteele@usculturaldynamics.com` from IP `73.121.154.15` including file uploads, folder creation, and page views, indicating active session usage.
+
+---
+
+### Conclusion and Recommendations
+
+- No brute force attack pattern detected in this log chunk.
+- However, the presence of multiple external IPs with successful authentication and token issuance for key users `jkapoor` and `jsteele` is suspicious and warrants further investigation.
+- The disabling and modification of Conditional Access Policies by system accounts should be audited to ensure these actions were authorized.
+- Verify the legitimacy of IP addresses `34.224.94.68`, `73.121.154.15`, and `3.80.218.146` with threat intelligence and internal asset management.
+- Review email sent by `jkapoor@usculturaldynamics.com` from suspicious IP for phishing or malicious content.
+- Consider enforcing multi-factor authentication (MFA) and reviewing token issuance policies.
+- Monitor these user accounts and IPs for further anomalous activity.
+- Conduct a broader search for failed login attempts or other suspicious activity in other log chunks.
+
+---
+
+If you require, I can assist with further analysis or correlation with other log chunks.

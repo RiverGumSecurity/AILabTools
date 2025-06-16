@@ -1,0 +1,43 @@
+Incident Analysis Report  
+========================  
+IncidentID: 20251206-152652  
+LogChunkID: 31/55  
+
+---  
+
+### Summary of Normal Activity  
+- Multiple successful user authentications and mailbox accesses by known users: `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com`.  
+- Operations include reading mail items, sending emails, token issuance (GATFRTokenIssue), file sync and access operations on OneDrive and SharePoint, and setting conditional access policies by system accounts.  
+- Conditional Access Policies are regularly updated by `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)` indicating routine administrative activity.  
+- User agents and client IPs for normal activity include a mix of Windows 10 desktops, Android devices, and various browsers (Edge, Chrome, Firefox).  
+- IP addresses such as `172.221.112.235`, `34.224.94.68`, `73.121.154.15` appear frequently with successful authentication and normal user activity.  
+
+### Suspicious Activity Discovered  
+- No explicit failed login attempts or brute force attempts are visible in this chunk of logs.  
+- No suspicious or anomalous IP addresses with failed logins escalating to successful logins are detected.  
+- No evidence of unusual privilege escalations or unauthorized mailbox permission changes.  
+- No suspicious conditional access policy changes that would weaken security (policies mostly relate to known networks or default policies).  
+- No suspicious user account creation or modification outside normal administrative actions.  
+- No signs of account compromise such as logins from unusual geographic locations or impossible travel.  
+- No suspicious OAuth token requests or unusual resource URLs indicating token theft or misuse.  
+
+### IP Source Addresses Involved in Suspicious Activity  
+- None identified in this log chunk.  
+
+### User Account Names Involved in Suspicious Activity  
+- None identified in this log chunk.  
+
+### Specific Log Data of Concern  
+- No specific log entries indicate compromise or attack in this dataset.  
+- All `UserLoggedIn` events show `ResultStatus` of `Success` with known users and consistent IP addresses.  
+- Conditional Access Policy changes are performed by system accounts and appear legitimate.  
+- Mailbox access and email send operations are consistent with normal user behavior.  
+
+---  
+
+### Conclusion  
+Based on the provided log chunk (31/55) for IncidentID 20251206-152652, there is **no evidence of compromise or attack**. All authentication events are successful and originate from known IP addresses associated with legitimate users. Administrative changes to policies are performed by system accounts and appear routine. No brute force or suspicious login patterns are detected in this data set.  
+
+Recommend continuing monitoring and reviewing other log chunks for any signs of suspicious activity.  
+
+---

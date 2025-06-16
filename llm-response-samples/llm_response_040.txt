@@ -1,0 +1,88 @@
+## Incident Analysis Report
+
+**IncidentID:** 20251206-153002  
+**LogChunkID:** 41/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful mailbox operations such as `MailItemsAccessed`, `Send`, `Create`, and `MoveToDeletedItems` were performed by legitimate users including `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com`.  
+- These operations originated from consistent IP addresses such as `73.121.154.15`, `34.224.94.68`, `172.221.112.235`, and various IPv6 addresses associated with the users.  
+- Several successful Azure Active Directory login events for users `jsteele@usculturaldynamics.com`, `jkapoor@usculturaldynamics.com`, and `gwootton@usculturaldynamics.com` from expected IP addresses and user agents.  
+- System-level operations (`Set-MailboxPlan`, `Set-ConditionalAccessPolicy`, `Set-Mailbox`, `Install-ResourceConfig`, etc.) were executed by `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)` which is normal for Exchange service maintenance and configuration.  
+- Threat Intelligence logs show inbound phishing emails detected and moved to JunkFolder, with sender IPs `199.15.214.48` and `199.15.215.229`. These are external threats but appear to be blocked and handled appropriately.  
+- Token issuance operations (`GATFRTokenIssue`) for legitimate users succeeded without anomalies.
+
+---
+
+### Suspicious Activity Discovered
+
+- No explicit brute force or failed login attempts are visible in this log chunk. All `UserLoggedIn` operations show `ResultStatus` as `Success`.  
+- However, there are multiple successful logins for user `jsteele@usculturaldynamics.com` from diverse and geographically dispersed IP addresses within a short timeframe, including:  
+  - `172.221.112.235` (Windows 10, Edge browser)  
+  - `18.212.101.151` (Windows 10, Chrome browser)  
+  - `54.163.19.39` (Windows, Edge browser)  
+  - `3.80.218.146` (used in mailbox access)  
+- The IP addresses `18.212.101.151`, `54.163.19.39`, and `3.80.218.146` are unusual compared to the regular IPs used by `jsteele` (mostly `73.121.154.15` and `172.221.112.235`).  
+- The presence of multiple conditional access policy changes (`Set-ConditionalAccessPolicy`) by system accounts may indicate policy modifications that could weaken security controls.  
+- The phishing emails detected indicate active targeting of the organization but no direct compromise from these emails is evident in this log chunk.  
+- The user `jsteele@usculturaldynamics.com` performed mailbox deletions (`SoftDelete`) and moved items to deleted folders from IP `172.221.112.235` and `3.80.218.146`, which could be normal but warrants review given the IP diversity.  
+- The user `jsteele@usculturaldynamics.com` also accessed mailbox items from IPs `2603:10b6:5:fe::10`, `2603:1036:301:2088::5`, and other IPv6 addresses, which may be legitimate but should be correlated with known user locations.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- `18.212.101.151`  
+- `54.163.19.39`  
+- `3.80.218.146`  
+
+These IPs are associated with successful logins and mailbox access for `jsteele@usculturaldynamics.com` but differ from the user's usual IP addresses, suggesting possible unauthorized access or session hijacking.
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- `jsteele@usculturaldynamics.com`
+
+This user account shows signs of potential compromise due to logins from unusual IP addresses and activity involving mailbox deletions and access from multiple disparate IPs.
+
+---
+
+### Specific Log Data of Concern
+
+1. **UserLoggedIn events for `jsteele@usculturaldynamics.com` from unusual IPs:**  
+   - 2024-08-06T20:54:43 from `18.212.101.151` (Windows10, Chrome)  
+   - 2024-08-06T19:10:44 from `54.163.19.39` (Windows, Edge)  
+   - 2024-08-09T18:21:50 and 2024-08-07T13:50:21 mailbox access from `3.80.218.146`  
+
+2. **Mailbox access and deletion by `jsteele@usculturaldynamics.com` from `3.80.218.146`:**  
+   - MailItemsAccessed and MoveToDeletedItems operations on 2024-08-07 and 2024-08-08.  
+
+3. **Multiple `Set-ConditionalAccessPolicy` operations by system accounts:**  
+   - Potential policy changes that could affect security posture (dates: 2024-07-12, 2024-07-21, 2024-07-24, 2024-08-03, 2024-08-07).  
+
+4. **Phishing email detections:**  
+   - 2024-08-02 and 2024-08-05 inbound phishing emails detected and quarantined, with sender IPs `199.15.214.48` and `199.15.215.229`.
+
+---
+
+## Conclusion
+
+- The evidence suggests a potential compromise of the user account `jsteele@usculturaldynamics.com` indicated by successful logins and mailbox access from multiple unusual IP addresses not consistent with normal user behavior.  
+- No brute force attempts were observed in this log chunk, but the presence of multiple geographically dispersed successful authentications for the same user is suspicious and indicative of possible credential compromise or session hijacking.  
+- The phishing emails detected may have been a vector for initial compromise but were blocked by security controls.  
+- Immediate actions recommended:  
+  - Investigate the IP addresses `18.212.101.151`, `54.163.19.39`, and `3.80.218.146` for geolocation and threat intelligence.  
+  - Review and possibly reset credentials for `jsteele@usculturaldynamics.com`.  
+  - Review conditional access policies for unauthorized changes.  
+  - Monitor for further suspicious activity or lateral movement.  
+
+---
+
+If further log chunks are available, correlating failed login attempts or other anomalous activities could provide additional insight.
+
+---
+
+**End of Report**

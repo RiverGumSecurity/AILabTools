@@ -1,0 +1,102 @@
+IncidentID: 20251206-153203  
+LogChunkID: 47/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple users, primarily `jsteele@usculturaldynamics.com`, `jkapoor@usculturaldynamics.com`, `gwootton@usculturaldynamics.com`, and `splanck@usculturaldynamics.com`, are seen performing typical operations such as mail access, file modifications, sending emails, and logging in successfully.
+- Successful logins are observed from a variety of IP addresses, including IPv6 addresses and some IPv4 addresses, consistent with normal user activity.
+- Operations related to mailbox configurations, conditional access policies, and token issuance are performed by system/service accounts (`NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)`), which appear legitimate.
+- The users `jsteele` and `jkapoor` show consistent activity over time, including file access, mail operations, and token issuance.
+- No widespread failed login attempts or brute force patterns are evident in the provided logs.
+- Some failed login events are present but are isolated and not part of a large volume or repeated attempts.
+
+---
+
+### Suspicious Activity Discovered
+
+- There is one notable failed login event for user `splanck@usculturaldynamics.com` from IP `24.111.1.131` on 2024-07-17 with a "UserStrongAuthClientAuthNRequiredInterrupt" error. However, this event is marked with `ResultStatus: Success`, which is contradictory and suspicious.
+- The user `splanck@usculturaldynamics.com` only appears in this failed login event and no other successful activity is logged for this user.
+- No clear brute force attack patterns (multiple failed logins from the same IP or user) are observed in this log chunk.
+- All other login attempts from various IPs and users show successful authentication without preceding failed attempts.
+- No evidence of suspicious IP addresses performing successful logins after multiple failed attempts.
+- Some conditional access policies are being disabled or modified by system accounts, which could be a risk if unauthorized but no user context suggests malicious intent here.
+- The user `jsteele@usculturaldynamics.com` has many activities from multiple IP addresses, including some IPv6 addresses and IPv4 addresses like `73.121.154.15`, `172.221.112.235`, `54.163.19.39`, `3.80.218.146`, and others. These IPs appear legitimate but should be checked against threat intelligence for reputation.
+- No direct evidence of compromise such as unusual login times, impossible travel, or access from suspicious geolocations is evident in this chunk.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- `24.111.1.131` (associated with suspicious failed login event for `splanck@usculturaldynamics.com`)
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- `splanck@usculturaldynamics.com` (failed login with suspicious status)
+
+---
+
+### Specific Log Data of Concern
+
+```json
+{
+  "CreationTime": "2024-07-17T13:54:26",
+  "Id": "ab89e2af-90a4-4856-a3d4-d4dc8c348600",
+  "Operation": "UserLoginFailed",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 15,
+  "ResultStatus": "Success",
+  "UserKey": "9da381ed-73aa-4898-b431-faeeb1d3aed8",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "AzureActiveDirectory",
+  "ClientIP": "24.111.1.131",
+  "ObjectId": "797f4846-ba00-4fd7-ba43-dac1f8f63013",
+  "UserId": "splanck@usculturaldynamics.com",
+  "AzureActiveDirectoryEventType": 1,
+  "ExtendedProperties": [
+    {"Name": "ResultStatusDetail", "Value": "Success"},
+    {"Name": "UserAgent", "Value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"},
+    {"Name": "UserAuthenticationMethod", "Value": "1"},
+    {"Name": "RequestType", "Value": "Login:login"}
+  ],
+  "ModifiedProperties": [],
+  "Actor": [
+    {"ID": "9da381ed-73aa-4898-b431-faeeb1d3aed8", "Type": 0},
+    {"ID": "splanck@usculturaldynamics.com", "Type": 5}
+  ],
+  "ActorContextId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "ActorIpAddress": "24.111.1.131",
+  "InterSystemsId": "92c9005d-4404-4ef0-938b-e4b804e84e89",
+  "IntraSystemId": "ab89e2af-90a4-4856-a3d4-d4dc8c348600",
+  "SupportTicketId": "",
+  "Target": [{"ID": "797f4846-ba00-4fd7-ba43-dac1f8f63013", "Type": 0}],
+  "TargetContextId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "ApplicationId": "c44b4083-3bb0-49c1-b47d-974e53cbdf3c",
+  "DeviceProperties": [
+    {"Name": "OS", "Value": "Windows10"},
+    {"Name": "BrowserType", "Value": "Firefox"},
+    {"Name": "SessionId", "Value": "6a17a168-36e4-4340-b126-b3300a5c22e3"}
+  ],
+  "ErrorNumber": "50074",
+  "LogonError": "UserStrongAuthClientAuthNRequiredInterrupt"
+}
+```
+
+---
+
+### Conclusion
+
+- The logs show predominantly normal user activity with successful authentications and typical operations.
+- No clear evidence of brute force or credential stuffing attacks is found in this log chunk.
+- The only suspicious event is a failed login with contradictory success status for user `splanck@usculturaldynamics.com` from IP `24.111.1.131`. This warrants further investigation to verify the legitimacy of this event and the user account status.
+- All other users and IP addresses appear to be performing expected activities without signs of compromise.
+- Recommend monitoring the user `splanck@usculturaldynamics.com` and the IP `24.111.1.131` for further suspicious activity.
+- Consider validating conditional access policy changes and ensure they are authorized and expected.
+
+---
+
+If additional log chunks are available, further correlation and analysis may reveal more context or suspicious patterns.

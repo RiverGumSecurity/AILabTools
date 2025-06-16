@@ -1,0 +1,109 @@
+Incident Analysis Report  
+========================  
+**IncidentID:** 20251206-152930  
+**LogChunkID:** 40/55  
+
+---  
+
+### Summary of Normal Activity  
+- Multiple successful user logins primarily by users: `jsteele@usculturaldynamics.com`, `jkapoor@usculturaldynamics.com`, and `splanck@usculturaldynamics.com`.  
+- Logins originate from a variety of IP addresses, including both IPv4 and IPv6 addresses, consistent with normal remote access patterns.  
+- Regular mailbox access and file operations (access, update, create) across Exchange, SharePoint, OneDrive workloads by legitimate users.  
+- Several administrative operations performed by `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)` related to mailbox and policy management, which appear routine and successful.  
+- Conditional Access Policies are being set and updated, mostly with "Disabled" state or known network policies, indicating ongoing policy management.  
+- Alerts generated are informational and related to mail forwarding/redirect rules creation, which could be normal or require further investigation if unexpected.  
+
+### Suspicious Activity Discovered  
+- Presence of a `UserLoginFailed` event with `ResultStatus` marked as `Success` but with an error number `50126` indicating "InvalidUserNameOrPassword" for user `jsteele@usculturaldynamics.com` from IP `73.121.154.15`. This suggests a failed login attempt was logged incorrectly as success or a misconfiguration.  
+- Multiple successful logins for `jsteele@usculturaldynamics.com` from IP addresses `73.121.154.15` and `172.221.112.235` and `2600:387:f:6d1a::7` and others, but also failed login attempts from `73.121.154.15`. This pattern may indicate brute force or credential stuffing attempts from this IP.  
+- The IP `73.121.154.15` is involved in both failed and successful authentications for the same user, which is suspicious and suggests potential credential compromise or attacker access.  
+- An alert for "Creation of forwarding/redirect rule" was triggered (ID: `7e343baf-8b43-4c7e-ebb5-08dca5e05913`) which is a common indicator of account compromise as attackers often set forwarding rules to exfiltrate emails.  
+- The forwarding/redirect rule creation alert references user `gwootton@usculturaldynamics.com`, which is not seen in normal login events but has mailbox access logged, indicating possible unauthorized mailbox rule creation.  
+- Some IP addresses used for mailbox access and token issuance are external and diverse, including `3.80.218.146`, `44.217.35.149`, and multiple IPv6 addresses; while not necessarily malicious alone, combined with other indicators, they warrant attention.  
+
+### IP Source Addresses Involved in Suspicious Activity  
+- `73.121.154.15` (multiple failed and successful login attempts for `jsteele`)  
+- `172.221.112.235` (successful logins for `jsteele`)  
+- `2600:387:f:6d1a::7` (successful login for `jsteele`)  
+- `44.217.35.149` (mailbox access by `gwootton`)  
+- `3.80.218.146` (mailbox access by `jsteele`)  
+
+### User Account Names Involved in Suspicious Activity  
+- `jsteele@usculturaldynamics.com` (failed and successful logins, mailbox access, suspicious IP activity)  
+- `gwootton@usculturaldynamics.com` (mailbox access, forwarding/redirect rule creation alert)  
+
+### Specific Log Data of Concern  
+
+1. **Failed Login with Success Status (Suspicious):**  
+```json
+{
+  "CreationTime": "2024-07-17T19:07:53",
+  "Id": "afdd6d56-8c59-4f7f-8e75-8cee65c23500",
+  "Operation": "UserLoginFailed",
+  "ResultStatus": "Success",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "73.121.154.15",
+  "ErrorNumber": "50126",
+  "LogonError": "InvalidUserNameOrPassword"
+}
+```
+
+2. **Alert Triggered for Forwarding/Redirect Rule Creation:**  
+```json
+{
+  "CreationTime": "2024-07-16T21:43:36",
+  "Id": "7e343baf-8b43-4c7e-ebb5-08dca5e05913",
+  "Operation": "AlertTriggered",
+  "AlertType": "System",
+  "Category": "ThreatManagement",
+  "Name": "Creation of forwarding/redirect rule",
+  "Severity": "Informational",
+  "Data": "{\"f3u\":\"gwootton@usculturaldynamics.com\",\"lon\":\"MailRedirect\"}"
+}
+```
+
+3. **Multiple Successful Logins from Same IP with Failed Attempts (User: jsteele):**  
+```json
+{
+  "CreationTime": "2024-07-21T19:32:14",
+  "Operation": "UserLoggedIn",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "73.121.154.15",
+  "ResultStatus": "Success"
+},
+{
+  "CreationTime": "2024-07-23T12:02:29",
+  "Operation": "UserLoggedIn",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "2600:387:f:6d1a::7",
+  "ResultStatus": "Success"
+}
+```
+
+4. **Mailbox Access by `gwootton@usculturaldynamics.com` from IP `44.217.35.149`:**  
+```json
+{
+  "CreationTime": "2024-07-18T19:02:08",
+  "Operation": "MailItemsAccessed",
+  "UserId": "gwootton@usculturaldynamics.com",
+  "ClientIPAddress": "44.217.35.149",
+  "ResultStatus": "Succeeded"
+}
+```
+
+---
+
+### Conclusion and Recommendations  
+- The logs indicate suspicious activity consistent with a **compromise of user accounts**, particularly `jsteele@usculturaldynamics.com` and possibly `gwootton@usculturaldynamics.com`.  
+- The presence of failed login attempts followed by successful logins from the same IP address suggests possible brute force or credential stuffing attacks that succeeded.  
+- The creation of forwarding/redirect rules by `gwootton` is a strong indicator of malicious activity and potential data exfiltration.  
+- Immediate actions should include:  
+  - Investigate and disable any unauthorized mail forwarding/redirect rules.  
+  - Force password resets and enable multi-factor authentication (MFA) for affected users.  
+  - Review and block suspicious IP addresses, especially `73.121.154.15`.  
+  - Conduct a thorough mailbox audit for data exfiltration or unauthorized access.  
+  - Monitor for further suspicious activity and consider a full incident response investigation.  
+
+---
+
+If further log chunks or data are available, a deeper timeline and correlation analysis is recommended.

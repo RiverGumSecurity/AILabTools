@@ -1,0 +1,70 @@
+Incident Analysis Report  
+========================  
+IncidentID: 20251206-152307  
+LogChunkID: 19/55  
+
+1. Summary of Normal Activity  
+-----------------------------  
+- Multiple successful user authentications for legitimate users "jsteele@usculturaldynamics.com" and "jkapoor@usculturaldynamics.com" from various IP addresses including corporate and cloud service IPs.  
+- Regular mailbox access, mail sending, file access, and mailbox configuration operations consistent with normal user and system activity.  
+- Conditional Access Policies and Mailbox Plans are being set and updated by system accounts (NT AUTHORITY\SYSTEM), indicating routine administrative tasks.  
+- Use of modern browsers and OAuth authentication methods, with expected UserAgents and device types.  
+- SharePoint and OneDrive file accesses and modifications by legitimate users with OAuth and FormsCookieAuth authentication, consistent with normal collaboration activities.  
+- Token issuance events (GATFRTokenIssue) for users without anomalies in status or source IPs.  
+
+2. Suspicious Activity Discovered  
+-------------------------------  
+- No explicit failed login attempts or brute force attempts are logged in this chunk.  
+- However, there is a notable pattern of multiple successful logins and mailbox accesses for user "jsteele@usculturaldynamics.com" from multiple geographically diverse IP addresses within a short timeframe, including:  
+  - 73.121.154.15  
+  - 172.221.112.235  
+  - 54.163.19.39  
+  - 54.219.139.191  
+  - 18.212.101.151  
+  - 3.80.218.146  
+  - 20.190.132.105  
+  - 52.108.181.1  
+  - 52.109.12.110  
+- Some of these IPs appear to be public cloud or hosting provider IPs (AWS, Azure ranges) and IPv6 addresses, which may be unusual for a single user unless VPN or cloud services are used legitimately.  
+- The user "jsteele@usculturaldynamics.com" has mailbox items deleted (SoftDelete), moved to deleted items, and mailbox items accessed from multiple IPs, suggesting potential mailbox compromise and data exfiltration or cleanup.  
+- The presence of multiple Set-ConditionalAccessPolicy operations by system accounts is normal, but the policies named "PC-Test" and "Known Networks List" should be reviewed for any suspicious or overly permissive configurations.  
+- No direct evidence of brute force attacks or failed login storms in this log chunk.  
+- No other user accounts show suspicious activity.  
+
+3. IP Source Addresses Involved in Suspicious Activity  
+-----------------------------------------------------  
+- 73.121.154.15  
+- 172.221.112.235  
+- 54.163.19.39  
+- 54.219.139.191  
+- 18.212.101.151  
+- 3.80.218.146  
+- 20.190.132.105  
+- 52.108.181.1  
+- 52.109.12.110  
+
+4. User Account Names Involved in Suspicious Activity  
+----------------------------------------------------  
+- jsteele@usculturaldynamics.com  
+
+5. Specific Log Data of Concern (Selected Highlights)  
+----------------------------------------------------  
+- Multiple UserLoggedIn operations for "jsteele@usculturaldynamics.com" from diverse IPs with ResultStatus: Success, e.g.:  
+  - {'CreationTime': '2024-07-19T20:04:54', 'UserId': 'jsteele@usculturaldynamics.com', 'ClientIP': '73.121.154.15', 'ResultStatus': 'Success'}  
+  - {'CreationTime': '2024-08-06T19:22:27', 'UserId': 'jsteele@usculturaldynamics.com', 'ClientIP': '18.212.101.151', 'ResultStatus': 'Success'}  
+  - {'CreationTime': '2024-08-05T09:04:13', 'UserId': 'jsteele@usculturaldynamics.com', 'ClientIP': '172.221.112.235', 'ResultStatus': 'Success'}  
+- MailItemsAccessed and SoftDelete operations by "jsteele@usculturaldynamics.com" from IP 172.221.112.235:  
+  - SoftDelete operation deleting multiple emails with subjects indicating potentially sensitive content.  
+  - MoveToDeletedItems operation on 2024-08-07 from same IP.  
+- File access and modifications from multiple IPs including 52.108.181.1, 3.80.218.146, 20.190.132.105, indicating broad access footprint.  
+- No failed login attempts or brute force attempts recorded in this chunk, but the broad IP range and mailbox deletions by a single user are suspicious.  
+
+Conclusion:  
+The activity indicates a likely compromise of the user account "jsteele@usculturaldynamics.com" with successful logins from multiple unusual IP addresses and subsequent mailbox access and deletions. This pattern is consistent with a compromised account being used for data access and cleanup by an attacker. Immediate action should include:  
+- Resetting the password and enforcing multi-factor authentication for "jsteele@usculturaldynamics.com".  
+- Reviewing Conditional Access Policies for any misconfigurations.  
+- Investigating the source IPs for geolocation and reputation.  
+- Checking for any mailbox forwarding or rules created by the attacker.  
+- Reviewing other logs for failed login attempts or lateral movement.  
+
+Please advise on next steps or if further log chunks need analysis.

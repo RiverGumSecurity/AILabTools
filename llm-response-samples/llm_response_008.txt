@@ -1,0 +1,94 @@
+Incident Analysis Report  
+IncidentID: 20251206-151942  
+LogChunkID: 9/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful mailbox access operations (MailItemsAccessed) by legitimate users:  
+  - Users: jsteele@usculturaldynamics.com, jkapoor@usculturaldynamics.com, nreynell@usculturaldynamics.com  
+  - Access mostly via Outlook Web Access (OWA) and REST clients from consistent IP addresses such as 73.121.154.15, 172.221.112.235, 2603:10b6:5:fe::10, 2603:10b6:303:243::5, 2603:10b6:406:fa::16, and others.  
+- Regular administrative operations performed by the system account NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost), including mailbox plan settings and conditional access policy updates.  
+- Successful user logins from known IP addresses and user agents consistent with Windows 10 and common browsers (Edge, Chrome).  
+- Token issuance events (GATFRTokenIssue) for users jkapoor and jsteele indicating normal OAuth token refresh and access.  
+- File operations on OneDrive and SharePoint by user jsteele, consistent with normal user activity.  
+
+---
+
+### Suspicious Activity Discovered
+
+- Presence of a "UserLoginFailed" event with ResultStatus marked as "Success" but with an error number 50074 and LogonError: "UserStrongAuthClientAuthNRequiredInterrupt" from IP 54.163.19.39 for user jsteele@usculturaldynamics.com. This is anomalous because a failed login operation should not have a success status. This may indicate an authentication bypass or an abnormal authentication flow.  
+- The IP 54.163.19.39 shows a suspicious login attempt that did not succeed in normal terms but was marked as success in the log, indicating possible exploitation or misconfiguration.  
+- No brute force attacks explicitly logged in this chunk, but the presence of this anomalous login event from an external IP not seen in other successful logins is suspicious.  
+- The file "passwords.txt" was downloaded by user jsteele from IP 18.212.101.151, which is unusual and could indicate data exfiltration or credential harvesting.  
+- Multiple conditional access policy changes by system account, including enabling/disabling policies, which may indicate attempts to weaken security controls.  
+- Access from multiple geographically diverse IP addresses for the same user (jsteele), including IPv4 and IPv6 addresses, which could indicate account compromise or use of VPN/proxies.  
+- The IP 3.80.218.146 accessed mailbox items for jsteele, but this IP is not seen in other normal login events for this user, suggesting possible unauthorized access.  
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- 54.163.19.39 (Suspicious login event with anomalous success/failure status)  
+- 18.212.101.151 (Download of sensitive file "passwords.txt")  
+- 3.80.218.146 (Mailbox access by user jsteele, unusual IP)  
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- jsteele@usculturaldynamics.com (Multiple suspicious events including anomalous login, file download, and access from unusual IPs)  
+
+---
+
+### Specific Log Data of Concern
+
+1. Suspicious login event:  
+```json
+{
+  "CreationTime": "2024-08-06T19:10:16",
+  "Id": "35220bb1-4e7a-4b7c-ad0b-ee267f797f00",
+  "Operation": "UserLoginFailed",
+  "ResultStatus": "Success",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "54.163.19.39",
+  "ErrorNumber": "50074",
+  "LogonError": "UserStrongAuthClientAuthNRequiredInterrupt"
+}
+```
+
+2. File download of sensitive file "passwords.txt":  
+```json
+{
+  "CreationTime": "2024-08-06T19:26:17",
+  "Id": "7f6f3208-4ee6-4a75-1b3d-08dcb64da4e7",
+  "Operation": "FileDownloaded",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "18.212.101.151",
+  "SourceFileName": "passwords.txt",
+  "SiteUrl": "https://usculturaldynamicsgmail-my.sharepoint.com/personal/jsteele_usculturaldynamics_com/"
+}
+```
+
+3. Mailbox access from unusual IP 3.80.218.146:  
+```json
+{
+  "CreationTime": "2024-08-07T19:14:12",
+  "Id": "c49cbe85-ae1a-4401-82d3-a8069eea5480",
+  "Operation": "MailItemsAccessed",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIPAddress": "3.80.218.146",
+  "ResultStatus": "Succeeded"
+}
+```
+
+---
+
+### Conclusion
+
+The logs indicate a potential compromise of the user account jsteele@usculturaldynamics.com. The suspicious login event from IP 54.163.19.39 with conflicting success/failure status, the download of a sensitive file named "passwords.txt" from IP 18.212.101.151, and mailbox access from an unusual IP 3.80.218.146 are strong indicators of malicious activity. The attacker may have gained access and exfiltrated sensitive information. Immediate incident response actions are recommended, including password resets, multi-factor authentication enforcement, and investigation of conditional access policy changes.
+
+---
+
+End of Report

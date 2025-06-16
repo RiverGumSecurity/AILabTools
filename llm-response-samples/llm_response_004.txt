@@ -1,0 +1,81 @@
+IncidentID: 20251206-151832  
+LogChunkID: 5/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful mailbox access and mail item operations performed by legitimate users, primarily `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com`.
+- Regular token issuance events (GATFRTokenIssue) for users, indicating normal authentication token requests.
+- Conditional Access Policy changes and mailbox configuration changes performed by `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)`, consistent with system or administrative activity.
+- User logins from consistent IP addresses such as `172.221.112.235`, `73.121.154.15`, `34.224.94.68`, and IPv6 addresses like `2600:387:f:818::4` and `2600:387:15:1f16::b`.
+- Activity includes SharePoint page views, Teams sessions, and sensitivity label applications, consistent with normal user operations.
+- User agents and client apps correspond to legitimate browsers and Microsoft Office clients.
+
+---
+
+### Suspicious Activity Discovered
+
+- No explicit brute force or failed login attempts are shown in this log chunk.
+- However, there are multiple successful logins and mailbox access events from IP addresses that are external and geographically diverse, including:
+  - `3.80.218.146`
+  - `54.163.19.39`
+  - `40.126.8.40`
+- These IP addresses are associated with successful authentication and mailbox access by user `jsteele@usculturaldynamics.com`.
+- The IP `54.163.19.39` shows a successful login with user ID "Not Available" but is linked to AzureActiveDirectory events and an Actor IP address of `54.163.19.39`. This could indicate a service or automated login or a suspicious anomaly.
+- The presence of multiple external IP addresses accessing the mailbox of `jsteele@usculturaldynamics.com` could indicate account compromise or unauthorized access.
+- The user `jsteele@usculturaldynamics.com` has mailbox access and token issuance from multiple IPs, including some that are not consistent with the usual IPs (`172.221.112.235`, `73.121.154.15`).
+- No direct evidence of brute force attacks in this chunk, but suspicious external IPs with successful authentication are a concern.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- 3.80.218.146
+- 54.163.19.39
+- 40.126.8.40
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- jsteele@usculturaldynamics.com
+
+---
+
+### Specific Log Data of Concern
+
+1. Multiple `UserLoggedIn` events for `jsteele@usculturaldynamics.com` from IP `54.163.19.39` with user ID "Not Available":
+   ```
+   {'CreationTime': '2024-08-06T19:10:21', 'Id': 'e119ba21-52ca-430d-ad4a-b9297d538300', 'Operation': 'UserLoggedIn', 'ResultStatus': 'Success', 'UserId': 'Not Available', 'ClientIP': '54.163.19.39', 'ActorIpAddress': '54.163.19.39', 'UserId': 'Not Available'}
+   ```
+2. Multiple `MailItemsAccessed` and `GATFRTokenIssue` operations for `jsteele@usculturaldynamics.com` from IP `3.80.218.146`:
+   ```
+   {'CreationTime': '2024-08-09T14:14:17', 'Id': '20c0a994-2f7b-4279-8529-54cc08119fe8', 'Operation': 'MailItemsAccessed', 'UserId': 'jsteele@usculturaldynamics.com', 'ClientIPAddress': '3.80.218.146', 'ResultStatus': 'Succeeded'}
+   ```
+3. SharePoint and OneDrive access from `3.80.218.146` associated with `jsteele@usculturaldynamics.com`.
+4. File preview and page views from IP `40.126.8.40` for user `jsteele@usculturaldynamics.com`:
+   ```
+   {'CreationTime': '2024-08-12T16:38:25', 'Id': '77a94ef5-daa6-4aa9-6b74-08dcbaed2ff8', 'Operation': 'FilePreviewed', 'UserId': 'jsteele@usculturaldynamics.com', 'ClientIP': '40.126.8.40'}
+   ```
+
+---
+
+### Conclusion
+
+- The logs do not show brute force attempts or failed login floods.
+- However, the presence of multiple successful logins and mailbox accesses from unusual external IP addresses for user `jsteele@usculturaldynamics.com` is suspicious and likely indicates account compromise.
+- The IP `54.163.19.39` login with "Not Available" user ID but linked to `jsteele` user context is suspicious and may indicate unauthorized or automated access.
+- Immediate actions recommended:
+  - Investigate the external IPs `3.80.218.146`, `54.163.19.39`, and `40.126.8.40` for geolocation and threat intelligence.
+  - Review account activity and reset credentials for `jsteele@usculturaldynamics.com`.
+  - Enable or enforce multi-factor authentication (MFA) if not already in place.
+  - Monitor for further suspicious activity from these IPs or accounts.
+
+---
+
+If further log chunks are available, a broader analysis could confirm if brute force or other attack patterns exist.
+
+---
+
+End of report.

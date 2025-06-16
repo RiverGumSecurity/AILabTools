@@ -1,0 +1,103 @@
+Incident Analysis Report  
+IncidentID: 20251206-152425  
+LogChunkID: 24/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful token issues (Operation: GATFRTokenIssue) for users `jkapoor@usculturaldynamics.com`, `jsteele@usculturaldynamics.com`, and `gwootton@usculturaldynamics.com` indicating normal OAuth token issuance for Microsoft 365 services.
+- Successful user logins (Operation: UserLoggedIn) from various IP addresses for users `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com`.
+- Regular mailbox activities such as mail items accessed, moved to deleted items, and mail sent, primarily by user `jsteele@usculturaldynamics.com`.
+- Conditional Access Policies being set and updated by system accounts (`NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)`), which is typical for Exchange Online management.
+- File access and modifications on SharePoint and OneDrive by legitimate users, mainly `jsteele@usculturaldynamics.com`.
+- Device registration events and other administrative operations consistent with normal tenant management.
+
+---
+
+### Suspicious Activity Discovered
+
+- There is a log entry for a **UserLoginFailed** event with a `ResultStatus` of "Success" but with a `LogonError` of "InvalidUserNameOrPassword" for user `jsteele@usculturaldynamics.com` from IP address `3.80.218.146`. This indicates a failed login attempt.
+- The IP address `3.80.218.146` is associated with multiple failed login attempts but also shows evidence of successful mailbox access and token issuance for the same user `jsteele@usculturaldynamics.com`.
+- Multiple successful logins and mailbox accesses from IP addresses that are geographically diverse and include both IPv4 and IPv6 addresses, some of which are uncommon or suspicious for the organization.
+- The presence of multiple IP addresses with failed login attempts followed by successful authentications suggests possible brute force or credential stuffing attacks that eventually succeeded.
+- The IP `3.80.218.146` is particularly suspicious due to failed login attempts followed by successful token issuance and mailbox access.
+- Other IPs such as `18.212.101.151`, `34.224.94.68`, and `73.121.154.15` also show successful logins and mailbox access, but no failed login attempts are logged from these IPs in this chunk.
+- The failed login event's `ResultStatus` is "Success" which is contradictory and could indicate log manipulation or a logging anomaly.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- `3.80.218.146` (Failed login attempts followed by successful authentication and mailbox access)
+- Potentially suspicious due to failed login and subsequent success from same IP.
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- `jsteele@usculturaldynamics.com` (Failed login attempts and successful access from suspicious IP)
+  
+---
+
+### Specific Log Data of Concern
+
+```json
+{
+  "CreationTime": "2024-08-12T15:56:42",
+  "Id": "bb780d50-c878-421b-99ca-890a3c735000",
+  "Operation": "UserLoginFailed",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 15,
+  "ResultStatus": "Success",
+  "UserKey": "4e0ad150-8f74-4adb-a1fa-e9c10a6c4dfe",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "AzureActiveDirectory",
+  "ClientIP": "3.80.218.146",
+  "ObjectId": "00000002-0000-0ff1-ce00-000000000000",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "AzureActiveDirectoryEventType": 1,
+  "ExtendedProperties": [
+    {"Name": "ResultStatusDetail", "Value": "Success"},
+    {"Name": "UserAgent", "Value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0 OS/10.0.20348"},
+    {"Name": "UserAuthenticationMethod", "Value": "1"},
+    {"Name": "RequestType", "Value": "Login:login"}
+  ],
+  "ErrorNumber": "50126",
+  "LogonError": "InvalidUserNameOrPassword"
+}
+```
+
+- Additional logs show successful mailbox access and token issuance for `jsteele@usculturaldynamics.com` from the same IP `3.80.218.146`:
+
+Example:
+
+```json
+{
+  "CreationTime": "2024-08-09T14:14:17",
+  "Id": "926b6797-2daf-4c67-8c75-503ce61d01d9",
+  "Operation": "MailItemsAccessed",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIPAddress": "3.80.218.146",
+  "ResultStatus": "Succeeded"
+}
+```
+
+---
+
+### Conclusion
+
+- The logs indicate a **suspected brute force or credential stuffing attack** targeting user `jsteele@usculturaldynamics.com` from IP address `3.80.218.146`.
+- The presence of failed login attempts followed by successful authentication from the same IP strongly suggests that the attacker was able to compromise the account.
+- Given the successful mailbox access and token issuance from the suspicious IP, this activity is **malicious**.
+- Other users and IPs appear normal with legitimate activity.
+- Immediate action is recommended to investigate the user account `jsteele@usculturaldynamics.com` for potential compromise, reset credentials, review mailbox content for unauthorized activity, and block or monitor the suspicious IP address `3.80.218.146`.
+
+---
+
+If further log chunks are available, additional correlation is recommended to identify other affected accounts or IPs.
+
+---
+
+End of report.

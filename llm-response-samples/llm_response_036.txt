@@ -1,0 +1,46 @@
+Incident Analysis Report  
+========================  
+IncidentID: 20251206-152838  
+LogChunkID: 37/55  
+
+1. Summary of Normal Activity  
+-----------------------------  
+- Multiple successful user authentications primarily for users "jsteele@usculturaldynamics.com" and "jkapoor@usculturaldynamics.com".  
+- Typical operations include file uploads, file renames, mailbox access, calendar configuration changes, and mailbox plan settings.  
+- Conditional Access Policies are being set and updated by system accounts (NT AUTHORITY\SYSTEM).  
+- Use of various client applications such as OWA, Edge browser, OneDriveSync, MSWACONSync, and others.  
+- Authentication types include OAuth, FormsCookieAuth, and service principal operations.  
+- Client IP addresses for legitimate activity include a range of IPv4 and IPv6 addresses consistent with user locations and Microsoft services.  
+- No evidence of failed login attempts or brute force attempts in the provided log chunk.  
+
+2. Suspicious Activity Discovered  
+--------------------------------  
+- No explicit failed login attempts or brute force patterns detected in this log chunk.  
+- No unusual or unauthorized user account creation or privilege escalation events noted.  
+- No suspicious IP addresses with failed attempts followed by successful authentication.  
+- No signs of compromised credentials or anomalous access patterns such as logins from unusual geolocations or unknown devices.  
+- Addition of a service principal "eM Client" by user "jsteele@usculturaldynamics.com" is noted; this may be normal if expected, but should be verified for legitimacy.  
+
+3. IP Source Addresses Involved in Suspicious Activity  
+------------------------------------------------------  
+- None identified in this log chunk.  
+
+4. User Account Names Involved in Suspicious Activity  
+----------------------------------------------------  
+- None identified in this log chunk.  
+
+5. Specific Log Data of Concern  
+-------------------------------  
+- Addition of service principal "eM Client" (AppId: e9a7fea1-1cc0-4cd9-a31b-9137ca5deedd) by "jsteele@usculturaldynamics.com" on 2024-08-09T14:13:57. This operation enables an application with OAuth permissions and should be reviewed to confirm it is authorized.  
+- Multiple Set-ConditionalAccessPolicy operations by system accounts modifying policies such as "Known Networks List" and "PC-Test". These appear routine but should be confirmed as legitimate administrative actions.  
+
+Conclusion  
+----------  
+Based on the provided log chunk, there is no direct evidence of compromise such as brute force attacks, unauthorized access, or suspicious IP addresses. All successful authentications appear to be by known users with consistent IP addresses and client applications. The only item for further review is the addition of the "eM Client" service principal by a user, which could be legitimate or potentially a vector for abuse if unauthorized.  
+
+Recommendations:  
+- Verify the legitimacy of the "eM Client" service principal addition and its permissions.  
+- Continue monitoring for failed login attempts or unusual authentication patterns in other log chunks.  
+- Review Conditional Access Policy changes for appropriateness and authorization.  
+
+Please advise if further log chunks or specific user activity analysis is required.

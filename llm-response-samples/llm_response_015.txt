@@ -1,0 +1,109 @@
+IncidentID: 20251206-152223  
+LogChunkID: 16/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful operations related to mailbox and device management by system/service accounts (e.g., "NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)").
+- Regular user activities by legitimate users, primarily `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com`, including:
+  - Successful user logins from consistent IP addresses.
+  - Mail items accessed through Outlook Web Access (OWA) and other Microsoft clients.
+  - SharePoint and OneDrive file and list operations.
+  - Conditional Access Policies being set and updated by system accounts.
+  - Token issuance events (GATFRTokenIssue) for authenticated sessions.
+- User agents and client applications appear consistent with normal business usage (Edge browser, Firefox, OWA, SharePoint Online Client Extensibility, OneDrive SyncEngine).
+- No evidence of failed login flood or brute force attempts in the logs provided.
+- Phishing email detected and moved to Junk folder (operation "TIMailData") with spoofing identified but no indication it resulted in compromise.
+
+---
+
+### Suspicious Activity Discovered
+
+- **UserLoginFailed event with unusual ResultStatus 'Success' but LogonError "UserStrongAuthClientAuthNRequiredInterrupt"** from IP `3.80.218.146` on 2024-08-06T20:57:20. This indicates a failed login due to strong authentication requirement but logged as success, which may indicate an authentication anomaly or misconfiguration.
+- Multiple successful authentications and mailbox accesses from IP addresses that are geographically diverse and unusual for the organization, including:
+  - `3.80.218.146` (multiple mail access and login failure events)
+  - `54.163.19.39`
+  - `54.219.139.191`
+  - `34.224.94.68`
+  - `172.221.112.235`
+- These IPs are not typical internal or corporate IP ranges and may be cloud or external ISP IPs, raising suspicion about possible unauthorized access.
+- The user `jsteele@usculturaldynamics.com` has multiple mailbox accesses and user logins from these external IPs, indicating possible account compromise.
+- The user `jkapoor@usculturaldynamics.com` also shows mailbox access and logins from external IPs such as `34.224.94.68` and IPv6 addresses.
+- The presence of "UserId": "Not Available" in some login events with successful status and external IPs (e.g., `54.163.19.39`) could indicate automated or service-based access that should be reviewed.
+- Conditional Access Policies are frequently updated and some are disabled (state: "Disabled"), which could be an attacker attempting to weaken security controls.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- 3.80.218.146
+- 54.163.19.39
+- 54.219.139.191
+- 34.224.94.68
+- 172.221.112.235
+- 2603:10b6:303:71::13 (IPv6)
+- 2603:10b6:301:44::28 (IPv6)
+- 2a01:111:2054:4a:ba91:99c2:68cd:77bb (IPv6)
+- 2a01:111:2054:5a:f0b1:589d:6da6:76ef (IPv6)
+- 2a01:111:2054:18:1b4:22a5:8cc3:d03b (IPv6)
+- 2a01:111:2053:508::ad4:5191 (IPv6)
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- jsteele@usculturaldynamics.com
+- jkapoor@usculturaldynamics.com
+- UserId "Not Available" (requires further investigation)
+
+---
+
+### Specific Log Data of Concern
+
+1. **UserLoginFailed with anomalous success status**  
+   - Time: 2024-08-06T20:57:20  
+   - IP: 3.80.218.146  
+   - LogonError: UserStrongAuthClientAuthNRequiredInterrupt  
+   - UserId: Not Available  
+   - Indicates potential authentication issues or bypass attempts.
+
+2. **Multiple successful mailbox accesses and logins from external IPs**  
+   - User: `jsteele@usculturaldynamics.com`  
+   - IPs: 3.80.218.146, 54.163.19.39, 54.219.139.191, 172.221.112.235  
+   - Operations: MailItemsAccessed, UserLoggedIn, GATFRTokenIssue  
+   - Suggests possible unauthorized access or session hijacking.
+
+3. **Conditional Access Policy changes**  
+   - Frequent updates and disabling of policies (e.g., "Default Policy" disabled multiple times) by system account  
+   - Times: 2024-07-17, 2024-08-07, 2024-08-08  
+   - Could indicate attacker attempting to weaken security posture.
+
+4. **Phishing email detected and delivered to Junk**  
+   - Operation: TIMailData  
+   - Time: 2024-08-08T15:36:51  
+   - SenderIp: 199.15.215.77  
+   - Verdict: Phish  
+   - No direct compromise shown but indicates targeted phishing attempt.
+
+---
+
+### Conclusion
+
+The logs show no brute force attack pattern but reveal suspicious successful authentications and mailbox accesses from multiple external IP addresses for key user accounts (`jsteele` and `jkapoor`). The disabling of Conditional Access Policies and anomalous login failure events with success status are concerning and suggest possible account compromise or attacker activity.
+
+**Recommended actions:**
+
+- Immediately investigate and verify legitimacy of logins from external IPs listed.
+- Review and restore Conditional Access Policies to enforce security controls.
+- Conduct password resets and enable multi-factor authentication (MFA) for affected users.
+- Monitor for further suspicious activity and consider forensic analysis of affected accounts.
+- Investigate the phishing email incident for potential impact.
+
+---
+
+If further log chunks are available, additional correlation and timeline analysis are advised.
+
+---
+
+End of report.

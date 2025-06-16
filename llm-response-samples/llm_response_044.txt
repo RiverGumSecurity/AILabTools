@@ -1,0 +1,121 @@
+Incident Analysis Report  
+IncidentID: 20251206-153124  
+LogChunkID: 45/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful mailbox operations (Set-Mailbox, Set-MailboxPlan, Add-MailboxPermission) performed by system accounts (NT AUTHORITY\SYSTEM) related to Exchange infrastructure and organizational mailbox settings.
+- Regular token issuance events (GATFRTokenIssue) for users such as `jkapoor@usculturaldynamics.com` and `jsteele@usculturaldynamics.com` indicating normal OAuth token grants for Exchange and other Microsoft 365 services.
+- Frequent file access and modification events by legitimate users (`jsteele@usculturaldynamics.com`, `jkapoor@usculturaldynamics.com`) across SharePoint and OneDrive services from various IP addresses, consistent with normal user activity.
+- Conditional Access Policies are being set and updated by system accounts, reflecting ongoing security policy management.
+- User login successes for known users from consistent IP addresses and devices, including Windows 10 and Android platforms.
+- No failed login attempts or suspicious authentication errors for most users except one noted event (detailed below).
+
+---
+
+### Suspicious Activity Discovered
+
+- **UserLoginFailed event with suspicious details:**
+
+  - On `2024-08-12T15:56:58`, a `UserLoginFailed` event was recorded for user `jsteele@usculturaldynamics.com` from IP `172.221.112.235`.
+  - The `ResultStatus` is marked as `Success` but the `LogonError` is `SsoArtifactRevoked` with error number `50133`.
+  - This indicates a failed SSO token validation, possibly due to revoked or reused tokens.
+  
+- **Repeated successful authentications from IP `172.221.112.235` for user `jsteele@usculturaldynamics.com`:**
+
+  - Multiple successful login and mail access events from this IP address.
+  - The same IP also shows the failed login event, which may indicate brute force or token replay attempts.
+  
+- **Presence of multiple geographically diverse IP addresses accessing the same user accounts:**
+
+  - For `jsteele@usculturaldynamics.com`, IPs include:
+    - `172.221.112.235` (multiple events)
+    - `3.80.218.146`
+    - `73.121.154.15`
+    - `2603:10b6:5:22a::19` (IPv6)
+    - `2603:1036:2404::23` (IPv6)
+    - `52.108.181.1`
+    - `52.108.248.90`
+  - For `jkapoor@usculturaldynamics.com`, IPs include:
+    - `34.224.94.68`
+    - `2603:10b6:303:71::13` (IPv6)
+  - The diversity of IPs, including some from different continents (e.g., 34.224.94.68 is an AWS IP likely US East, 52.108.x.x is Microsoft Azure IP in Europe), may indicate account sharing or unauthorized access.
+  
+- **No explicit brute force failure flood detected in this chunk, but the failed login event with token issues is suspicious.**
+
+- **No direct evidence of password spray or brute force attacks in this log chunk, but the failed login with token revocation error and subsequent successful logins from same IP is concerning.**
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- `172.221.112.235`  
+- `3.80.218.146`  
+- `73.121.154.15`  
+- `34.224.94.68`  
+- `52.108.181.1`  
+- `52.108.248.90`  
+- `2603:10b6:5:22a::19`  
+- `2603:1036:2404::23`  
+- `2603:10b6:303:71::13`  
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- `jsteele@usculturaldynamics.com`  
+- `jkapoor@usculturaldynamics.com`  
+
+---
+
+### Specific Log Data of Concern
+
+```json
+{
+  "CreationTime": "2024-08-12T15:56:58",
+  "Id": "1a4bcc79-4c69-4341-9994-a4dd42af9f00",
+  "Operation": "UserLoginFailed",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 15,
+  "ResultStatus": "Success",
+  "UserKey": "4e0ad150-8f74-4adb-a1fa-e9c10a6c4dfe",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "AzureActiveDirectory",
+  "ClientIP": "172.221.112.235",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "AzureActiveDirectoryEventType": 1,
+  "ExtendedProperties": [
+    {"Name": "ResultStatusDetail", "Value": "Success"},
+    {"Name": "UserAgent", "Value": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Mobile Safari/537.36"},
+    {"Name": "RequestType", "Value": "OAuth2:Authorize"}
+  ],
+  "ErrorNumber": "50133",
+  "LogonError": "SsoArtifactRevoked"
+}
+```
+
+- Multiple successful `UserLoggedIn` and `MailItemsAccessed` events from the same IP `172.221.112.235` for user `jsteele@usculturaldynamics.com`.
+- Token issuance events (GATFRTokenIssue) for both `jsteele` and `jkapoor` from various IPs including those listed above.
+- Access from multiple IPs and geographic locations for the same user accounts without clear justification.
+
+---
+
+### Conclusion
+
+- The logs show evidence of suspicious authentication behavior involving user `jsteele@usculturaldynamics.com` and to a lesser extent `jkapoor@usculturaldynamics.com`.
+- The failed login event with `SsoArtifactRevoked` error from IP `172.221.112.235` followed by multiple successful authentications from the same IP suggests possible token replay or session hijacking.
+- The diversity of IP addresses accessing the same accounts, including IPs from different regions, raises suspicion of unauthorized access or credential compromise.
+- No explicit brute force attack pattern is visible in this log chunk, but the failed login event combined with successful logins from suspicious IPs is indicative of compromise.
+- Immediate investigation and remediation recommended, including:
+  - Review of conditional access policies (noted many policy changes).
+  - Enforce MFA and review token issuance logs.
+  - Investigate IP addresses for geolocation and threat intelligence.
+  - Reset credentials and revoke active sessions for affected users.
+  - Monitor for further suspicious activity.
+
+---
+
+If further log chunks are available, a broader timeline analysis is recommended to confirm attack patterns.

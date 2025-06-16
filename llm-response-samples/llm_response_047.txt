@@ -1,0 +1,129 @@
+IncidentID: 20251206-153228  
+LogChunkID: 48/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful mailbox access and mail item operations by legitimate users, primarily `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com`.
+- Regular use of Microsoft Exchange Online, SharePoint, OneDrive, and Azure Active Directory services.
+- Conditional access policies and mailbox plans are being set and updated by system accounts (`NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)`), consistent with normal administrative operations.
+- Frequent issuance of tokens (GATFRTokenIssue) for users, indicating normal authentication and authorization flows.
+- Various file and folder operations (access, modification, download) performed by legitimate users.
+- User agents and client IPs correspond to typical corporate environments and known client applications (OWA, Edge, REST clients).
+- No large-scale failed login attempts or brute force indicators in this log chunk.
+- Some login failures are recorded but appear isolated and followed by successful logins.
+
+---
+
+### Suspicious Activity Discovered
+
+- There is a **UserLoginFailed** event for user `jsteele@usculturaldynamics.com` from IP `172.221.112.235` with a logon error `SsoArtifactRevoked` (ErrorNumber: 50133). This indicates a failed single sign-on token but the status is marked as "Success" which is contradictory and suspicious.
+- The IP address `172.221.112.235` is also associated with successful logins and other operations by `jsteele@usculturaldynamics.com`, indicating potential suspicious activity from this IP.
+- The IP `172.221.112.235` is an external IP and is involved in both failed and successful authentication events for the same user, which may indicate a compromised session or attacker attempting to authenticate.
+- No explicit brute force attack patterns (multiple failed logins in short time) are visible in this log chunk, but the presence of failed login followed by successful login from the same suspicious IP is concerning.
+- No other unusual usernames or unknown accounts detected in this log chunk.
+- No evidence of privilege escalation or unusual administrative activity by user accounts other than system accounts.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- **172.221.112.235**  
+  - Associated with failed login (UserLoginFailed) with suspicious SsoArtifactRevoked error.  
+  - Also associated with successful login and mail operations by `jsteele@usculturaldynamics.com`.  
+  - External IP, unusual for normal internal access patterns.
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- **jsteele@usculturaldynamics.com**  
+  - User with both failed and successful login attempts from suspicious IP `172.221.112.235`.  
+  - Multiple mailbox access and mail operations from this IP and others.
+
+---
+
+### Specific Log Data of Concern
+
+```json
+{
+  "CreationTime": "2024-08-12T15:58:43",
+  "Id": "246a0186-2dd2-4554-a3a2-4f61ef5d8c00",
+  "Operation": "UserLoginFailed",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 15,
+  "ResultStatus": "Success",
+  "UserKey": "4e0ad150-8f74-4adb-a1fa-e9c10a6c4dfe",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "AzureActiveDirectory",
+  "ClientIP": "172.221.112.235",
+  "ObjectId": "00000003-0000-0ff1-ce00-000000000000",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "AzureActiveDirectoryEventType": 1,
+  "ExtendedProperties": [
+    {"Name": "ResultStatusDetail", "Value": "Success"},
+    {"Name": "UserAgent", "Value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0 OS/10.0.22631"},
+    {"Name": "RequestType", "Value": "OAuth2:Authorize"}
+  ],
+  "ErrorNumber": "50133",
+  "LogonError": "SsoArtifactRevoked",
+  "ActorIpAddress": "172.221.112.235"
+}
+```
+
+And related successful login and mail access events from the same IP:
+
+```json
+{
+  "CreationTime": "2024-08-06T19:20:47",
+  "Id": "9b639082-ce6a-43da-c155-08dcb64ce03c",
+  "Operation": "Send",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 2,
+  "ResultStatus": "Succeeded",
+  "UserKey": "10032003A6A72A25",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "Exchange",
+  "ClientIP": "172.221.112.235",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "AppId": "5d661950-3475-41cd-a2c3-d671a3162bc1",
+  "ClientAppId": "5d661950-3475-41cd-a2c3-d671a3162bc1",
+  "ClientIPAddress": "172.221.112.235",
+  "ClientInfoString": "Client=OWA;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0;",
+  "ExternalAccess": false,
+  "InternalLogonType": 0,
+  "LogonType": 0,
+  "LogonUserSid": "S-1-5-21-1350491342-3630794113-937186470-29913992",
+  "MailboxGuid": "fcfcfbe0-e4f3-484f-ac65-d761fd805692",
+  "MailboxOwnerSid": "S-1-5-21-1350491342-3630794113-937186470-29913992",
+  "MailboxOwnerUPN": "jsteele@usculturaldynamics.com",
+  "OrganizationName": "USCulturalDynamicsgmail.onmicrosoft.com",
+  "OriginatingServer": "DM6PR04MB5129 (15.20.4200.000)\r\n",
+  "SessionId": "f399963b-57bf-4257-8752-4e3c0e06f4f0",
+  "Item": {
+    "Id": "RgAAAADrSf6CjJt7SrHvNtsGI1vkBwAZYRYvRe5aQJ878DbHtCJNAAAAAAEPAAAZYRYvRe5aQJ878DbHtCJNAAALazpmAAAJ",
+    "InternetMessageId": "<DM6PR04MB5129B6895D570AAFDA98227FD5BF2@DM6PR04MB5129.namprd04.prod.outlook.com>",
+    "ParentFolder": {"Id": "LgAAAADrSf6CjJt7SrHvNtsGI1vkAQAZYRYvRe5aQJ878DbHtCJNAAAAAAEPAAAB", "Path": "\\Drafts"},
+    "SizeInBytes": 10015,
+    "Subject": "Re: Annual Account Review"
+  },
+  "SaveToSentItems": true
+}
+```
+
+---
+
+### Conclusion
+
+- The suspicious activity involves the user `jsteele@usculturaldynamics.com` with the IP address `172.221.112.235`.
+- The presence of a failed login event with `SsoArtifactRevoked` error followed by successful authentication and mailbox operations from the same IP suggests possible session hijacking or unauthorized access.
+- No brute force attack pattern is evident in this log chunk.
+- Immediate investigation and mitigation recommended for the IP `172.221.112.235` and the user account `jsteele@usculturaldynamics.com`.
+- Consider resetting credentials, reviewing conditional access policies, and monitoring for further suspicious activity.
+
+---
+
+If further log chunks are available, a broader timeline analysis is recommended to confirm the extent of compromise.

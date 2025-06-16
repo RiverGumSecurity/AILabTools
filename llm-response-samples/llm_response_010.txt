@@ -1,0 +1,87 @@
+IncidentID: 20251206-152024  
+LogChunkID: 11/55
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful token issuance events (Operation: GATFRTokenIssue) for users `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com` with no ClientIP logged in some cases, which is typical for internal or service-issued tokens.
+- Regular mailbox access and mail item operations (MailItemsAccessed, Create) by legitimate users such as `jsteele@usculturaldynamics.com`, `jkapoor@usculturaldynamics.com`, and `jleary@usculturaldynamics.com` from consistent IP addresses.
+- Conditional Access Policies are being set and updated by the system account `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)` as part of normal Exchange management.
+- User logins (UserLoggedIn) for known users with successful status from various IP addresses, mostly consistent with user activity, including OAuth2 authorization flows.
+- OneDrive and SharePoint activities such as file modifications, folder creations, and page views by legitimate users and applications.
+- Sensitivity labels applied to emails by users, consistent with organizational data protection policies.
+- IP addresses used for normal activity include both IPv4 and IPv6 addresses, such as `73.121.154.15`, `34.224.94.68`, `172.221.112.235`, `2600:387:15:3814::9`, `2603:10b6:5:fe::10`, and others.
+
+---
+
+### Suspicious Activity Discovered
+
+- No explicit brute force or failed login attempts are logged in this chunk, so no direct evidence of brute force attack.
+- However, there are multiple successful login and token issuance events from a wide range of IP addresses, including some that are uncommon or geographically diverse, which may indicate potential account compromise or lateral movement.
+- Notably, the user `jsteele@usculturaldynamics.com` has successful logins and mailbox access from multiple distinct IP addresses, including:
+  - IPv4: `73.121.154.15`, `172.221.112.235`, `54.163.19.39`, `52.108.181.1`
+  - IPv6: `2600:387:15:3814::9`, `2600:387:15:1f16::b`, `2603:10b6:2404::17`, `2603:10b6:5:fe::10`, `2603:10b6:2400::39`, `2600:387:f:6d1a::7`, `2600:387:f:818::4`
+- Some of these IP addresses (e.g., `54.163.19.39`, `52.108.181.1`) are cloud provider IPs (AWS ranges), which may be unusual for normal user activity.
+- The user `jkapoor@usculturaldynamics.com` also has successful logins from IP `34.224.94.68` (AWS IP range).
+- The presence of multiple Conditional Access Policy changes by system account with some policies disabled or modified could be suspicious if not authorized.
+- The diversity and volume of IP addresses used by the same user in a short timeframe could indicate account misuse or session hijacking.
+- The user `jsteele@usculturaldynamics.com` has multiple OAuth and FormsCookieAuth authentications from different IPs and devices, which may indicate session hijacking or token theft.
+- No failed login attempts are visible in this chunk, but the successful logins from unusual IPs warrant further investigation.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- 73.121.154.15  
+- 172.221.112.235  
+- 54.163.19.39  
+- 52.108.181.1  
+- 34.224.94.68  
+- 2600:387:15:3814::9  
+- 2600:387:15:1f16::b  
+- 2603:10b6:2404::17  
+- 2603:10b6:5:fe::10  
+- 2603:10b6:2400::39  
+- 2600:387:f:6d1a::7  
+- 2600:387:f:818::4  
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- jsteele@usculturaldynamics.com  
+- jkapoor@usculturaldynamics.com  
+
+---
+
+### Specific Log Data of Concern
+
+- Multiple `UserLoggedIn` events for `jsteele@usculturaldynamics.com` from IPs:  
+  - `172.221.112.235` (2024-08-06T19:10:48, 2024-08-07T13:17:49, 2024-08-12T22:25:02)  
+  - `73.121.154.15` (2024-07-24T12:25:39)  
+  - `2600:387:15:1f16::b` (2024-08-08T14:31:49)  
+  - `2600:387:f:6d1a::7` (2024-07-23T12:02:31)  
+- `UserLoggedIn` for `jkapoor@usculturaldynamics.com` from IP `34.224.94.68` (2024-07-19T12:54:35)  
+- `MailItemsAccessed` by `jsteele@usculturaldynamics.com` from multiple IPs including `73.121.154.15`, `172.221.112.235`, `2603:10b6:5:fe::10`  
+- `FileModifiedExtended` and `FileAccessed` operations from IPs `23.101.184.74`, `20.253.167.42`, `52.108.181.1`, which are cloud IPs and may be unusual.  
+- Multiple `Set-ConditionalAccessPolicy` operations by system account modifying policies, including disabling default policies and setting known networks list, which could weaken security posture if unauthorized.
+
+---
+
+### Conclusion and Recommendations
+
+- There is no direct evidence of brute force attack in this log chunk, but the wide range of IP addresses used by key users, especially `jsteele@usculturaldynamics.com`, including cloud provider IPs, is suspicious and could indicate account compromise or misuse.
+- The successful authentications from these diverse IPs should be investigated further, including correlating with user activity and verifying if these IPs are legitimate or associated with VPNs or proxies.
+- Review recent Conditional Access Policy changes for unauthorized modifications that could have reduced security controls.
+- Recommend immediate password resets and multi-factor authentication (MFA) enforcement for affected users.
+- Conduct a full audit of user sessions and revoke any suspicious or unknown active sessions.
+- Monitor for any unusual data access or exfiltration activity following these logins.
+
+---
+
+If further log chunks or failed login attempts are available, they should be reviewed to confirm if brute force or credential stuffing attacks are occurring.
+
+---
+
+End of report.

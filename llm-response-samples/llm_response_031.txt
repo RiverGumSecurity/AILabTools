@@ -1,0 +1,119 @@
+Incident Analysis Report  
+IncidentID: 20251206-152713  
+LogChunkID: 32/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful mailbox and policy configuration changes performed by system account `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)`. These include operations like `Set-Mailbox`, `Set-ConditionalAccessPolicy`, `Set-MailboxPlan`, and `Add-MailboxPermission`.
+- Regular user activities by legitimate users including:
+  - `jsteele@usculturaldynamics.com`
+  - `jkapoor@usculturaldynamics.com`
+  - `gwootton@usculturaldynamics.com`
+  - `jleary@usculturaldynamics.com`
+- These users have successful login events (`UserLoggedIn`) from consistent IP addresses and access mailbox items, OneDrive files, and SharePoint pages.
+- Typical client applications used include OWA, OneDrive Web App, SharePoint Online Client Extensibility, OneNote, and various Microsoft Exchange services.
+- Client IP addresses for legitimate users include:
+  - 73.121.154.15 (multiple successful logins and mailbox accesses by `jsteele`)
+  - 172.221.112.235 (multiple mailbox accesses by `jsteele`)
+  - 3.80.218.146 (mailbox accesses by `jsteele`)
+  - 34.224.94.68 (mailbox access by `jkapoor`)
+  - 44.217.35.149 (mailbox access by `gwootton`)
+  - 2603:10b6:408:273::22 (mailbox access by `jleary`)
+  - 2603:1036:2404::23 (OneNote file modification by `jsteele`)
+- Authentication methods and user agents appear consistent with normal user activity.
+
+---
+
+### Suspicious Activity Discovered
+
+- Presence of a file named `passwords.txt` accessed via OneDrive Web App by user `jsteele@usculturaldynamics.com` from IP `172.221.112.235`. The filename suggests potential credential exposure or malicious activity.
+- Multiple `Set-ConditionalAccessPolicy` operations performed by system account with "DummyKnownNetworkPolicy" and "Known Networks List" policies being modified repeatedly over a short period. This could indicate policy tampering to weaken security controls.
+- A phishing email detected and delivered as spam to user `jsteele@usculturaldynamics.com`:
+  - Subject: "Act Now: Why Enhanced Network Security is Essential in 2024"
+  - Sender IP: 199.15.214.46
+  - DKIM and SPF passed but DMARC failed, indicating spoofing.
+- No explicit brute force attempts or failed login floods detected in this log chunk.
+- No suspicious IP addresses with failed logins followed by successful logins found.
+- However, the presence of sensitive file `passwords.txt` and phishing email indicates potential compromise or reconnaissance activity.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- `172.221.112.235` - Accessed suspicious file `passwords.txt` in OneDrive.
+- `199.15.214.46` - Source IP of phishing email detected targeting user `jsteele@usculturaldynamics.com`.
+- (Note: All other IPs appear consistent with legitimate user activity.)
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- `jsteele@usculturaldynamics.com` - Accessed suspicious file `passwords.txt`, recipient of phishing email, multiple mailbox and OneDrive activities.
+- No other user accounts show suspicious activity in this log chunk.
+
+---
+
+### Specific Log Data of Concern
+
+1. **Suspicious File Access**  
+```
+{
+  "CreationTime": "2024-08-05T13:10:00",
+  "Operation": "FileAccessed",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "172.221.112.235",
+  "SourceFileName": "passwords.txt",
+  "ApplicationDisplayName": "OneDrive Web App (modern)",
+  "SiteUrl": "https://usculturaldynamicsgmail-my.sharepoint.com/personal/jsteele_usculturaldynamics_com/",
+  "ObjectId": "https://usculturaldynamicsgmail-my.sharepoint.com/personal/jsteele_usculturaldynamics_com/Documents/Misc/passwords.txt"
+}
+```
+
+2. **Phishing Email Detection**  
+```
+{
+  "CreationTime": "2024-08-06T16:22:22",
+  "Operation": "TIMailData",
+  "UserId": "ThreatIntel",
+  "DeliveryAction": "DeliveredAsSpam",
+  "DetectionMethod": "Spoof external domain",
+  "SenderIp": "199.15.214.46",
+  "Subject": "Act Now: Why Enhanced Network Security is Essential in 2024",
+  "Recipients": ["jsteele@usculturaldynamics.com"],
+  "Verdict": "Phish"
+}
+```
+
+3. **Conditional Access Policy Changes** (multiple entries)  
+Example:  
+```
+{
+  "CreationTime": "2024-08-04T03:42:08",
+  "Operation": "Set-ConditionalAccessPolicy",
+  "UserId": "NT AUTHORITY\\SYSTEM (Microsoft.Exchange.ServiceHost)",
+  "Parameters": [
+    {"Name": "Identity", "Value": "USCulturalDynamicsgmail.onmicrosoft.com\\d036f098-c3a2-4a59-9082-3aa464465a7b"},
+    {"Name": "PolicyDetails", "Value": "{\"DummyKnownNetworkPolicy\":\"\"}"}
+  ],
+  "ResultStatus": "True"
+}
+```
+
+---
+
+### Conclusion
+
+- No brute force or credential stuffing attacks detected in this log chunk.
+- Evidence suggests possible compromise or reconnaissance activity focused on user `jsteele@usculturaldynamics.com`:
+  - Access to a suspicious file named `passwords.txt` stored in OneDrive.
+  - Receipt of a phishing email with spoofed domain.
+- Multiple conditional access policy modifications may indicate attempts to weaken security policies.
+- Recommend immediate investigation of the `passwords.txt` file contents and user account `jsteele` for potential credential exposure or misuse.
+- Review and harden conditional access policies to prevent unauthorized changes.
+- Conduct phishing awareness training and verify no credentials were compromised from the phishing attempt.
+
+---
+
+If further log chunks are available, review for failed login attempts or other suspicious authentication patterns to confirm or refute compromise.

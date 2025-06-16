@@ -1,0 +1,73 @@
+Incident Analysis Report  
+IncidentID: 20251206-152240  
+LogChunkID: 17/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful user login events for legitimate users, primarily `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com`.
+- Logins originate from a variety of IP addresses consistent with normal user behavior, including:
+  - `172.221.112.235` (frequent for `jsteele`)
+  - `73.121.154.15` (frequent for `jsteele`)
+  - `34.224.94.68` (frequent for `jkapoor`)
+  - Other IPv6 addresses associated with `jsteele`.
+- Regular mailbox and mailbox plan management operations performed by system accounts (`NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)`).
+- Conditional Access Policies are being set and updated by system accounts, indicating routine security policy management.
+- File and folder operations in OneDrive and SharePoint by legitimate users, consistent with normal business activities.
+- Token issuance events for users accessing Exchange and Outlook services appear successful and routine.
+- No failed login attempts or brute force indicators observed in this log chunk.
+- The user agent strings and device properties correspond to typical browsers and platforms (Windows 10, Edge, Chrome, Firefox, Android).
+
+---
+
+### Suspicious Activity Discovered
+
+- No direct evidence of brute force attacks or failed login attempts in this log chunk.
+- No suspicious or anomalous user accounts detected; all user IDs appear legitimate and consistent.
+- No indication of unauthorized access or access from unusual geographic locations.
+- No alerts or security events indicating compromise or malicious activity in the provided log chunk.
+- The "AlertEntityGenerated" event relates to a creation of a forwarding/redirect rule for user `gwootton@usculturaldynamics.com` but is marked as informational and active. This may warrant review but is not confirmed malicious here.
+- No evidence of IP addresses involved in suspicious activity that also show successful authentication.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- None identified in this log chunk.
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- None identified in this log chunk.
+
+---
+
+### Specific Log Data of Concern
+
+- AlertEntityGenerated event:  
+  - ID: `fcd0144d-33c2-4d3b-9511-08dca5e05910`  
+  - UserId: `SecurityComplianceAlerts`  
+  - AlertId: `f797f087-5474-6c41-c800-08dca5deb9e6`  
+  - AlertType: `System`  
+  - Name: `Creation of forwarding/redirect rule`  
+  - Entity: `gwootton@usculturaldynamics.com`  
+  - Severity: `Informational`  
+  - Status: `Active`  
+  This alert indicates a forwarding/redirect rule was created for a user, which can be a common tactic for exfiltration but here is informational only. Recommend reviewing the actual rule for legitimacy.
+
+---
+
+### Conclusion
+
+Based on the analysis of this log chunk, there is no direct evidence of compromise or malicious activity such as brute force attacks or unauthorized access. User authentications are successful and originate from expected IP addresses and devices. The only item of note is an informational alert about a forwarding/redirect rule creation, which should be reviewed further but does not itself confirm compromise.
+
+---
+
+If further log chunks are available, review for failed login attempts, unusual IP addresses, or other indicators of compromise.
+
+---
+
+Report prepared by: SOC Incident Response Engineer  
+Date: 2024-08-12

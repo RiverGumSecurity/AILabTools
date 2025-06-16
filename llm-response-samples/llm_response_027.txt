@@ -1,0 +1,54 @@
+IncidentID: 20251206-152550  
+LogChunkID: 28/55
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful mailbox and mailbox plan configuration operations performed by system accounts (NT AUTHORITY\SYSTEM) related to Exchange service, which is normal for system maintenance.
+- Regular mail item accesses by legitimate users "jsteele@usculturaldynamics.com" and "jkapoor@usculturaldynamics.com" from various IP addresses, mostly consistent with known client applications (OWA, REST, WebServices, OneDrive, SharePoint).
+- Frequent issuance of GATFR tokens (OAuth tokens) for users "jsteele" and "jkapoor" indicating normal OAuth authentication flows.
+- SharePoint and OneDrive file access and modifications by user "jsteele@usculturaldynamics.com" from various IPs, consistent with normal user activity.
+- Conditional Access Policies being set and updated by system accounts, which is typical for tenant policy management.
+- User logins for "jsteele@usculturaldynamics.com" and other users from various IPs with successful authentication and OAuth authorization.
+- Client IP addresses for normal user activity include IPv4 addresses such as 73.121.154.15, 34.224.94.68, 172.221.112.235, and IPv6 addresses like 2603:1036:2404::17, 2603:1036:2400::39, 2603:10b6:208:17c::15, etc.
+
+---
+
+### Suspicious Activity Discovered
+
+- No explicit failed login attempts or brute force attempts are visible in this log chunk.
+- No suspicious or unknown usernames other than legitimate users "jsteele@usculturaldynamics.com" and "jkapoor@usculturaldynamics.com" and system accounts.
+- No suspicious IP addresses with failed logins or attempts to access multiple accounts.
+- No evidence of anomalous or unauthorized mailbox access or configuration changes by non-system users.
+- All authentication events for users "jsteele" and "jkapoor" show successful results and originate from consistent IP addresses and client applications.
+- No signs of token misuse or abnormal token issuance.
+- No evidence of suspicious Conditional Access Policy changes that would weaken security; policies appear to be managed by system accounts.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- None identified in this log chunk.
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- None identified in this log chunk.
+
+---
+
+### Specific Log Data of Concern
+
+- No specific log entries indicate compromise or suspicious activity in this data chunk.
+
+---
+
+# Conclusion
+
+Based on the analysis of the provided Microsoft 365 Unified Audit Log chunk (28/55), there is no evidence of compromise or suspicious authentication activity. All user authentications are successful and consistent with normal user behavior and system operations. No brute force or unauthorized access attempts are detected. The users involved in authentication are legitimate, and IP addresses are consistent with known user activity.
+
+---
+
+If further log chunks are available, analysis of those may provide additional context or reveal suspicious activity not present in this chunk.

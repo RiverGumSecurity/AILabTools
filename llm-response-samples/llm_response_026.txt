@@ -1,0 +1,81 @@
+IncidentID: 20251206-152531  
+LogChunkID: 27/55  
+
+---
+
+### Summary of Normal Activity
+
+- The logs show multiple successful mailbox and policy configuration operations performed by the system account "NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)". These include operations such as `Set-MailboxPlan`, `Set-Mailbox`, `Set-ConditionalAccessPolicy`, and `Set-AdminAuditLogConfig`. These are typical administrative actions for Exchange Online and tenant configuration.
+
+- Several users, primarily `jsteele@usculturaldynamics.com`, `jkapoor@usculturaldynamics.com`, and `splanck@usculturaldynamics.com`, have successful logins and mailbox access events from various IP addresses, mostly IPv6 addresses and some IPv4 addresses, indicating normal user activity.
+
+- The users access mail items, create calendar items, and interact with SharePoint and OneDrive services using legitimate client applications and OAuth tokens.
+
+- Conditional Access Policies are being updated regularly by the system account, which is expected in a managed tenant environment.
+
+---
+
+### Suspicious Activity Discovered
+
+- There is evidence of multiple successful login events from the IP address `172.221.112.235` associated with user `jsteele@usculturaldynamics.com`. This IP address also appears in SharePoint page views and mailbox access events.
+
+- The IP address `172.221.112.235` is notable because it is an IPv4 address that appears repeatedly for user `jsteele@usculturaldynamics.com` and is also associated with a "UserLoggedIn" event where the UserId is marked as "Not Available" but the ActorIpAddress is `172.221.112.235`. This could indicate a session hijack or token replay.
+
+- There are several `Set-ConditionalAccessPolicy` operations that disable or modify policies named "Default Policy" and "Known Networks List" by the system account. Disabling or weakening Conditional Access Policies can be a sign of attacker activity to reduce security controls.
+
+- No explicit brute force attempts are visible in this chunk, but the presence of multiple successful token issues (`GATFRTokenIssue`) and logins from the same IP address `172.221.112.235` combined with policy changes is suspicious.
+
+- The user `jsteele@usculturaldynamics.com` has mailbox access and SharePoint activity from multiple IP addresses including `172.221.112.235`, `18.212.101.151`, and various IPv6 addresses. The IPv4 `172.221.112.235` is the most frequent and associated with potentially anomalous activity.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- `172.221.112.235` (Repeated successful logins, mailbox access, SharePoint access, and suspicious user ID "Not Available" login event)  
+- `18.212.101.151` (SharePoint page prefetch and sign-in events for user `jsteele@usculturaldynamics.com`)  
+- `3.80.218.146` (Mailbox access for user `jsteele@usculturaldynamics.com`)  
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- `jsteele@usculturaldynamics.com` (Primary user involved in suspicious activity)  
+- Potential indirect impact on `jkapoor@usculturaldynamics.com` and `splanck@usculturaldynamics.com` due to shared environment and mailbox access patterns, but no direct suspicious activity for these users in this chunk.
+
+---
+
+### Specific Log Data of Concern
+
+- UserLoggedIn event with `UserId: Not Available` but `ActorIpAddress: 172.221.112.235` and `ResultStatus: Success` at `2024-08-12T15:58:18` (Id: b04570f4-de2c-49cc-9f05-efed88e09700). This is unusual and may indicate token misuse or session hijacking.
+
+- Multiple `Set-ConditionalAccessPolicy` operations disabling or modifying policies (e.g., Default Policy disabled multiple times on 7/19, 7/21, 7/25, 7/28, 8/2, 8/7, 8/12). These changes weaken security posture and may be attacker-driven.
+
+- Frequent `GATFRTokenIssue` operations for user `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com` from various IPs, including the suspicious IP `172.221.112.235`.
+
+- MailItemsAccessed and SharePoint activity from `172.221.112.235` for `jsteele@usculturaldynamics.com` indicating active usage from this IP.
+
+---
+
+# Conclusion
+
+The log chunk shows no clear brute force attempts but reveals suspicious activity centered around the IP address `172.221.112.235` used by `jsteele@usculturaldynamics.com`. The unusual successful login event with "UserId: Not Available" from this IP, combined with repeated disabling of Conditional Access Policies, suggests a potential compromise involving session hijacking or misuse of authentication tokens. The attacker may have weakened security policies to maintain persistence.
+
+---
+
+# Recommendations
+
+- Investigate the source and legitimacy of IP `172.221.112.235`. Determine if it is a known corporate IP or an external suspicious address.
+
+- Review the Conditional Access Policy changes and restore policies to a secure state immediately.
+
+- Perform a password reset and reauthentication for user `jsteele@usculturaldynamics.com`.
+
+- Enable multi-factor authentication (MFA) if not already enabled.
+
+- Conduct a full audit of recent user and admin activities, focusing on policy changes and token issuance.
+
+- Monitor for further suspicious activity from the identified IP addresses.
+
+---
+
+If further log chunks are available, analyze them for additional evidence of brute force or lateral movement.

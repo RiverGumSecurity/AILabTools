@@ -1,0 +1,101 @@
+IncidentID: 20251206-152815  
+LogChunkID: 36/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful user logins and mailbox accesses by legitimate users such as `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com` from various IP addresses including `172.221.112.235`, `34.224.94.68`, `73.121.154.15`, and IPv6 addresses like `2600:387:f:6d1a::7`.
+- Routine Exchange and SharePoint operations such as setting mailbox plans, conditional access policies, mailbox permissions, sending emails, and file modifications.
+- Use of various client applications including OWA, Outlook, OneDrive sync clients, and mobile browsers.
+- Administrative system actions performed by `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)` related to Exchange configurations and policies.
+- OAuth token issuance events for legitimate users.
+- User `jsteele@usculturaldynamics.com` has consistent activity across multiple devices and IPs, including mobile and desktop platforms.
+- No evidence of failed login attempts or brute force attempts in this log chunk.
+- Conditional Access Policies are being set and updated, mostly by system accounts, with some policies disabled or updated.
+
+---
+
+### Suspicious Activity Discovered
+
+- **Creation of Inbox Rule by user `jsteele@usculturaldynamics.com` on 2024-07-19T12:58:41:**
+  - Rule named "Move all messages from SANS AtRisk to Cyber Resources" created.
+  - This rule moves all messages from `consensussecurityvulnerabilityalert@email.sans.org` to a folder named "Cyber Resources".
+  - This could be used to hide security alerts or vulnerability notifications by automatically moving them out of the inbox, which is a common tactic used by attackers to evade detection.
+- No direct evidence of brute force or failed login attempts in this log chunk.
+- No suspicious IP addresses identified as performing failed logins.
+- The presence of multiple IP addresses accessing the mailbox of `jsteele@usculturaldynamics.com` from diverse geographic locations and devices could warrant further correlation but no explicit anomaly or failure is shown here.
+- No evidence of unauthorized mailbox permission changes or mailbox forwarding rules created by unknown users in this chunk.
+- No suspicious authentication failures or unusual user account creations/modifications detected.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- No suspicious IP addresses identified from this log chunk.
+- IPs involved in normal user activity include:
+  - `172.221.112.235`
+  - `34.224.94.68`
+  - `73.121.154.15`
+  - `18.212.101.151`
+  - `2600:387:f:6d1a::7` (IPv6)
+  - `2603:1036:2400::39` (IPv6)
+  - `52.108.181.1`
+  - `3.80.218.146`
+  - `54.163.19.39`
+  - `2603:10b6:8:1f4::11` (IPv6)
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- `jsteele@usculturaldynamics.com` (created suspicious inbox rule to move security alert emails)
+  
+Other users seen in logs with normal activity:  
+- `jkapoor@usculturaldynamics.com`  
+- `gwootton@usculturaldynamics.com`  
+- `justin@blackhillsinfosec.com` (external consultant or auditor)  
+
+---
+
+### Specific Log Data of Concern
+
+```json
+{
+  "CreationTime": "2024-07-19T12:58:41",
+  "Id": "2fb80e97-71ad-47ca-1731-08dca7f283ec",
+  "Operation": "New-InboxRule",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "ResultStatus": "True",
+  "UserKey": "jsteele@usculturaldynamics.com",
+  "UserType": 2,
+  "Workload": "Exchange",
+  "ClientIP": "[2600:387:f:818::4]:12650",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "Parameters": [
+    {"Name": "AlwaysDeleteOutlookRulesBlob", "Value": "False"},
+    {"Name": "Force", "Value": "False"},
+    {"Name": "From", "Value": "consensussecurityvulnerabilityalert@email.sans.org"},
+    {"Name": "MoveToFolder", "Value": "Cyber Resources"},
+    {"Name": "Name", "Value": "Move all messages from SANS AtRisk to Cyber Resources"},
+    {"Name": "SubjectContainsWords", "Value": ""},
+    {"Name": "StopProcessingRules", "Value": "True"}
+  ],
+  "RequestId": "32d3b274-3610-ca46-afc6-24e7f24904b3",
+  "SessionId": "f399963b-57bf-4257-8752-4e3c0e06f4f0"
+}
+```
+
+---
+
+# Conclusion
+
+- The primary suspicious activity is the creation of an inbox rule by user `jsteele@usculturaldynamics.com` that moves security alert emails (from a known security alert sender) to a separate folder, potentially hiding important security notifications.
+- No brute force or failed login attempts detected in this log chunk.
+- All IP addresses involved in authentication appear legitimate and are associated with successful logins.
+- Recommend further investigation of the inbox rule creation context, user behavior, and mailbox contents for signs of compromise or insider threat.
+- Review other log chunks for brute force or suspicious authentication attempts if available.
+
+---
+
+If you require further analysis or correlation with other log chunks, please provide additional data.

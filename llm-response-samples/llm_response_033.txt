@@ -1,0 +1,125 @@
+Incident Analysis Report  
+=======================
+
+IncidentID: 20251206-152740  
+LogChunkID: 34/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful authentications and token issues for users `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com` from various IP addresses, including internal and external IPs.
+- Regular mailbox access and mail item operations by legitimate users, primarily `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com`.
+- Several conditional access policy changes performed by the system account `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)`, indicating routine administrative or automated policy management.
+- Use of modern browsers and Microsoft clients (Edge, Chrome, MSWACONSync, OWA) consistent with normal user activity.
+- OAuth2 and other modern authentication methods used successfully.
+- No anomalous user agents or device types detected in normal activity logs.
+
+---
+
+### Suspicious Activity Discovered
+
+- Presence of multiple failed login attempts recorded as `UserLoginFailed` events with a `ResultStatus` of "Success" (which is unusual and likely indicates a logging anomaly or a specific Azure AD error code scenario).
+- Failed login attempts with error codes such as `50074` ("UserStrongAuthClientAuthNRequiredInterrupt") and `50133` ("SsoArtifactRevoked") indicating authentication interruptions or token revocation.
+- The IP address `3.80.218.146` is associated with both failed login attempts and subsequent successful mailbox access and token issuance, indicating possible brute force or credential stuffing attempts followed by successful compromise.
+- The IP address `172.221.112.235` shows failed login attempts with `UserLoginFailed` but also multiple successful logins and mailbox accesses, suggesting possible malicious activity or session hijacking.
+- The IP address `18.212.101.151` also shows successful logins and mailbox access; while no failed login from this IP is shown, its presence in the context of suspicious IPs warrants attention.
+- The user `jsteele@usculturaldynamics.com` is repeatedly targeted with failed login attempts and also shows successful authentications from suspicious IPs.
+- The `UserLoginFailed` events have `ResultStatus` "Success" which is contradictory and may indicate that the failure event was logged but the authentication succeeded or was bypassed.
+- The presence of multiple IPs with failed login attempts followed by successful authentications for the same user suggests a brute force or password spraying attack that succeeded.
+- No other usernames besides `jsteele@usculturaldynamics.com` show this pattern of failed then successful access from suspicious IPs.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- `3.80.218.146`  
+- `172.221.112.235`  
+- `18.212.101.151`  
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- `jsteele@usculturaldynamics.com`
+
+---
+
+### Specific Log Data of Concern
+
+1. Failed login with error `50074` from IP `3.80.218.146` for user `jsteele@usculturaldynamics.com`:
+```json
+{
+  "CreationTime": "2024-08-06T20:57:03",
+  "Operation": "UserLoginFailed",
+  "ResultStatus": "Success",
+  "ClientIP": "3.80.218.146",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ErrorNumber": "50074",
+  "LogonError": "UserStrongAuthClientAuthNRequiredInterrupt"
+}
+```
+
+2. Successful mailbox access and token issuance from `3.80.218.146` for `jsteele@usculturaldynamics.com` shortly after failed login attempts:
+```json
+{
+  "CreationTime": "2024-08-09T14:14:17",
+  "Operation": "MailItemsAccessed",
+  "ResultStatus": "Succeeded",
+  "ClientIPAddress": "3.80.218.146",
+  "UserId": "jsteele@usculturaldynamics.com"
+}
+```
+
+3. Failed login with error `50133` from IP `172.221.112.235` for user `jsteele@usculturaldynamics.com`:
+```json
+{
+  "CreationTime": "2024-08-12T15:48:59",
+  "Operation": "UserLoginFailed",
+  "ResultStatus": "Success",
+  "ClientIP": "172.221.112.235",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ErrorNumber": "50133",
+  "LogonError": "SsoArtifactRevoked"
+}
+```
+
+4. Successful login from `172.221.112.235` for `jsteele@usculturaldynamics.com` after failed attempts:
+```json
+{
+  "CreationTime": "2024-08-12T16:37:49",
+  "Operation": "UserLoggedIn",
+  "ResultStatus": "Success",
+  "ClientIP": "172.221.112.235",
+  "UserId": "jsteele@usculturaldynamics.com"
+}
+```
+
+5. Successful login from `18.212.101.151` for `jsteele@usculturaldynamics.com`:
+```json
+{
+  "CreationTime": "2024-08-06T20:54:26",
+  "Operation": "UserLoggedIn",
+  "ResultStatus": "Success",
+  "ClientIP": "18.212.101.151",
+  "UserId": "jsteele@usculturaldynamics.com"
+}
+```
+
+---
+
+### Conclusion
+
+- The logs indicate a likely brute force or credential stuffing attack targeting user `jsteele@usculturaldynamics.com` from IP addresses `3.80.218.146` and `172.221.112.235`.
+- Both IPs show failed login attempts followed by successful authentications and mailbox access, confirming compromise.
+- The IP `18.212.101.151` also shows successful login activity for the same user and should be considered suspicious in this context.
+- Immediate action is recommended to investigate these IPs further, reset the password for `jsteele@usculturaldynamics.com`, enable or enforce multi-factor authentication (MFA), and review mailbox access logs for any unauthorized activity or data exfiltration.
+- Review and tighten conditional access policies to block or restrict access from suspicious IP ranges.
+
+---
+
+If further log chunks or data are available, a more comprehensive investigation is recommended.
+
+---
+
+End of Report

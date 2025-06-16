@@ -1,0 +1,81 @@
+Incident Analysis Report  
+========================  
+IncidentID: 20251206-152347  
+LogChunkID: 22/55  
+
+1. Summary of Normal Activity  
+-----------------------------  
+- Multiple successful operations related to Exchange, SharePoint, OneDrive, and Microsoft Teams workloads.  
+- Regular user activities such as file access, mail item access, message sending, calendar item creation, and label application observed for users:  
+  - jsteele@usculturaldynamics.com  
+  - jkapoor@usculturaldynamics.com  
+  - gwootton@usculturaldynamics.com  
+- Authentication token issuance (GATFRTokenIssue) events are common and mostly successful, indicating normal OAuth token refresh and usage.  
+- Conditional access policies and mailbox plans are being updated by system accounts (NT AUTHORITY\SYSTEM), which is normal for Exchange service operations.  
+- User agent strings and client apps are consistent with typical user behavior (Edge, Chrome, OWA, REST clients).  
+- No unusual or failed login storms detected in the logs provided.  
+
+2. Suspicious Activity Discovered  
+---------------------------------  
+- There is one event labeled "UserLoginFailed" with Operation: UserLoginFailed but ResultStatus: Success, which is contradictory and suspicious. The event:  
+  - CreationTime: 2024-08-12T16:37:58  
+  - Id: cf3b1a4e-4e5b-489f-b0d5-3fccc62e8b00  
+  - UserId: jsteele@usculturaldynamics.com  
+  - ClientIP: 172.221.112.235  
+  - LogonError: FlowTokenExpired  
+  This indicates a login failure event recorded as success, possibly a logging anomaly or a token replay attempt.  
+- The IP address 172.221.112.235 is seen in this suspicious login failure event and also in successful mail access events for user jsteele@usculturaldynamics.com, indicating that this IP address has authenticated successfully at some point.  
+- The presence of multiple IP addresses with failed or unusual login attempts is not evident in this chunk, but the contradictory login failure event is notable.  
+- No brute force attack pattern (multiple failed logins from same IP or user) is observed in this data chunk.  
+- No evidence of account enumeration or multiple usernames used in suspicious manner.  
+
+3. IP Source Addresses Involved in Suspicious Activity  
+-----------------------------------------------------  
+- 172.221.112.235 (associated with suspicious login failure event but also successful authentication)  
+
+4. User Account Names Involved in Suspicious Activity  
+----------------------------------------------------  
+- jsteele@usculturaldynamics.com (user involved in suspicious login failure event and successful authentications from same IP)  
+
+5. Specific Log Data of Concern  
+------------------------------  
+```json
+{
+  "CreationTime": "2024-08-12T16:37:58",
+  "Id": "cf3b1a4e-4e5b-489f-b0d5-3fccc62e8b00",
+  "Operation": "UserLoginFailed",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 15,
+  "ResultStatus": "Success",
+  "UserKey": "4e0ad150-8f74-4adb-a1fa-e9c10a6c4dfe",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "AzureActiveDirectory",
+  "ClientIP": "172.221.112.235",
+  "ObjectId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "AzureActiveDirectoryEventType": 1,
+  "ExtendedProperties": [
+    {"Name": "ResultStatusDetail", "Value": "Success"},
+    {"Name": "UserAgent", "Value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0 OS/10.0.22631"},
+    {"Name": "RequestType", "Value": "Login:login"}
+  ],
+  "ErrorNumber": "50089",
+  "LogonError": "FlowTokenExpired"
+}
+```
+
+- This event shows a login failure operation but with a success result status, indicating a possible token replay or session hijacking attempt.  
+- The IP address 172.221.112.235 is also seen in successful mail access events for the same user, which suggests this IP is malicious or compromised.  
+
+---
+
+**Conclusion:**  
+- No clear brute force or credential stuffing attack patterns detected in this log chunk.  
+- However, the contradictory login failure event with success status and the presence of the same IP address in successful authentications is suspicious and may indicate a token replay or session hijacking attack.  
+- The user account jsteele@usculturaldynamics.com and IP 172.221.112.235 should be investigated further for potential compromise.  
+- Recommend monitoring for additional suspicious login failures, unusual token usage, and reviewing conditional access policies for this user and IP.  
+
+---
+
+If additional log chunks are available, further correlation is recommended to confirm attack patterns or lateral movement.

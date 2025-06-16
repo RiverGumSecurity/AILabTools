@@ -1,0 +1,119 @@
+IncidentID: 20251206-153529  
+LogChunkID: 54/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful mailbox access events by legitimate users such as `jsteele@usculturaldynamics.com`, `jkapoor@usculturaldynamics.com`, and `gwootton@usculturaldynamics.com` from various IP addresses, mostly consistent with corporate or known user IP ranges.
+- Regular issuance of GATFR tokens (OAuth tokens) for these users, indicating normal authentication flows.
+- Routine administrative operations performed by `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)` related to mailbox plans, conditional access policies, and transport configurations.
+- File access and modifications in OneDrive and SharePoint by legitimate users, consistent with normal business activities.
+- Sensitivity labels applied to emails and documents, indicating data classification and protection policies in place.
+- Threat Intelligence event showing a phishing email detected and moved to Junk folder, with no indication that it was successful.
+
+---
+
+### Suspicious Activity Discovered
+
+- **No explicit brute force or failed login attempts are present in this log chunk**, so no direct evidence of brute force attacks.
+- However, **several Conditional Access Policies were repeatedly disabled or modified** by `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)`:
+  - Multiple `Set-ConditionalAccessPolicy` operations show the "Default Policy" being disabled multiple times (e.g., on 7/15/2024, 7/18/2024, 7/27/2024, 8/8/2024).
+  - Disabling or modifying Conditional Access Policies can weaken security controls and may indicate malicious activity or misconfiguration.
+- **Addition of a new service principal named "Azure Files"** with credentials added on 7/24/2024:
+  - `Add service principal.` operation with `DisplayName` "Azure Files" and enabled account.
+  - Service principals can be used for automation but also for persistence or lateral movement if unauthorized.
+- Several file accesses from unusual or external IP addresses (e.g., `52.108.181.1`, `3.80.218.146`, `73.121.154.15`) by user `jsteele@usculturaldynamics.com`.
+- A phishing email detected with sender IP `199.15.214.50` targeting `jsteele@usculturaldynamics.com`, indicating attempted external compromise.
+- No direct evidence of compromised credentials or successful logins from suspicious IPs in this log chunk.
+- However, the repeated disabling of Conditional Access Policies and creation of service principal may indicate a **compromise or insider threat**.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- `52.108.181.1` — File accessed by `jsteele@usculturaldynamics.com` via OneDrive.
+- `3.80.218.146` — File accessed by `jsteele@usculturaldynamics.com` via SharePoint.
+- `73.121.154.15` — Mailbox accessed by `jsteele@usculturaldynamics.com`.
+- `199.15.214.50` — Sender IP of phishing email detected targeting internal user.
+- No brute force IPs identified, but these IPs are notable for external access or suspicious activity.
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- `jsteele@usculturaldynamics.com` — Target of phishing email, multiple accesses from unusual IPs.
+- `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)` — Performed multiple Conditional Access Policy disables and mailbox configurations; this is a system account but the repeated disabling of policies is suspicious.
+- No other user accounts show suspicious authentication patterns in this log chunk.
+
+---
+
+### Specific Log Data of Concern
+
+1. **Repeated Disabling of Conditional Access Policies:**
+
+```json
+{
+  "Operation": "Set-ConditionalAccessPolicy",
+  "ResultStatus": "True",
+  "UserId": "NT AUTHORITY\\SYSTEM (Microsoft.Exchange.ServiceHost)",
+  "Parameters": [
+    {"Name": "PolicyDetails", "Value": "{\"Version\":0,\"State\":\"Disabled\"}"},
+    {"Name": "DisplayName", "Value": "Default Policy"}
+  ],
+  "CreationTime": "Multiple dates: 7/15/2024, 7/18/2024, 7/27/2024, 8/8/2024"
+}
+```
+
+2. **Addition of Service Principal "Azure Files":**
+
+```json
+{
+  "Operation": "Add service principal.",
+  "ResultStatus": "Success",
+  "UserId": "ServicePrincipal_c23ab169-517c-42a2-a4a9-766fbe8e8e8c",
+  "ModifiedProperties": [
+    {"Name": "AccountEnabled", "NewValue": "[true]"},
+    {"Name": "DisplayName", "NewValue": "[\"Azure Files\"]"},
+    {"Name": "Credential", "NewValue": "[{\"CredentialType\":2,...}]"}
+  ],
+  "CreationTime": "2024-07-24T09:51:49"
+}
+```
+
+3. **Phishing Email Detected:**
+
+```json
+{
+  "Operation": "TIMailData",
+  "ResultStatus": "DeliveredAsSpam",
+  "UserId": "ThreatIntel",
+  "SenderIp": "199.15.214.50",
+  "Recipients": ["jsteele@usculturaldynamics.com"],
+  "Subject": "Is Your SOC Ready for AI’s Next Big Breakthrough? Learn How in Our Live Panel!",
+  "DetectionType": "Inline",
+  "Verdict": "Phish"
+}
+```
+
+4. **Unusual External IP File Accesses by `jsteele@usculturaldynamics.com`:**
+
+- IP: `52.108.181.1` (OneDrive file access)
+- IP: `3.80.218.146` (SharePoint file access)
+- IP: `73.121.154.15` (Mailbox access)
+
+---
+
+# Conclusion
+
+- There is no direct evidence of brute force attacks or failed login attempts in this log chunk.
+- However, the repeated disabling of Conditional Access Policies is highly suspicious and could indicate an attacker or insider weakening security controls.
+- The creation of a new service principal with credentials ("Azure Files") could be a persistence mechanism.
+- A phishing email was detected targeting a key user (`jsteele@usculturaldynamics.com`), which could be an initial vector for compromise.
+- External IP addresses accessing files and mailboxes of `jsteele@usculturaldynamics.com` may be legitimate but warrant further investigation due to their diversity and some being non-corporate IPs.
+- Recommend immediate review and re-enabling of Conditional Access Policies, investigation of the service principal creation, and monitoring or blocking of suspicious IP addresses.
+- User accounts `jsteele` and `jkapoor` should be monitored for unusual activity, and phishing awareness reinforced.
+
+---
+
+If further log chunks are available, analysis of failed login attempts and other authentication events would be useful to confirm or refute compromise hypotheses.

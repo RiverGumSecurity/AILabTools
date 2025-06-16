@@ -1,0 +1,138 @@
+## Incident Analysis Report
+
+**IncidentID:** 20251206-152051  
+**LogChunkID:** 12/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful token issuance events (`GATFRTokenIssue`) for users `jsteele@usculturaldynamics.com`, `jkapoor@usculturaldynamics.com`, and `gwootton@usculturaldynamics.com` from various IPs and no client IP (likely internal or trusted).
+- Regular mailbox accesses (`MailItemsAccessed`) by legitimate users `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com` from IPs such as `73.121.154.15`, `172.221.112.235`, `2603:10b6:303:71::13`, `3.80.218.146`, `34.224.94.68`, and others.
+- Conditional Access Policies being set and updated by `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)`, which is normal system activity.
+- File access and modifications in OneDrive and SharePoint by legitimate users.
+- User login successes for `jsteele` and `jkapoor` from various IP addresses consistent with their normal usage.
+- Activity from known client applications such as OWA, Edge, OneNote, MSWACONSync, and others.
+- No unusual or failed login spikes for multiple users except one notable event (see suspicious activity).
+
+---
+
+### Suspicious Activity Discovered
+
+- A suspicious `UserLoginFailed` event for user `jsteele@usculturaldynamics.com` with `ResultStatus` marked as `Success` but the `Operation` is `UserLoginFailed` (likely a logging anomaly or a failed login event that was reprocessed). The IP involved is `3.80.218.146`.
+- The IP `3.80.218.146` is also associated with multiple successful mailbox access and login events for `jsteele@usculturaldynamics.com`.
+- The presence of a file named `passwords.txt` uploaded or synced via OneDriveSync by `jsteele@usculturaldynamics.com` from IP `73.121.154.15` is suspicious as it may indicate credential harvesting or exfiltration.
+- The `SharingPolicyChanged` event by `jsteele@usculturaldynamics.com` enabling `ShareUsingAnonymousLinks` (changed from False to True) on 2024-07-17, which could allow anonymous external access to internal resources.
+- Multiple conditional access policies are being disabled or modified, which could weaken security posture.
+- The `UserLoginFailed` event with error `DelegationDoesNotExist` for `jsteele@usculturaldynamics.com` at IP `3.80.218.146` could indicate attempted unauthorized delegation or privilege escalation.
+- The IP `3.80.218.146` appears multiple times in suspicious contexts: failed login, mailbox access, and token issuance.
+- No explicit brute force attack pattern (e.g., multiple failed logins from many IPs) is evident in this chunk, but the suspicious login failure with success status and the presence of sensitive file `passwords.txt` are concerning.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- `3.80.218.146`  
+- `73.121.154.15` (due to `passwords.txt` upload and anonymous sharing policy change)  
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- `jsteele@usculturaldynamics.com`  
+
+---
+
+### Specific Log Data of Concern
+
+1. **UserLoginFailed with suspicious ResultStatus:**
+
+```json
+{
+  "CreationTime": "2024-08-09T14:13:21",
+  "Id": "b9764354-2834-4746-a255-a1533f222f00",
+  "Operation": "UserLoginFailed",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 15,
+  "ResultStatus": "Success",
+  "UserKey": "4e0ad150-8f74-4adb-a1fa-e9c10a6c4dfe",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "AzureActiveDirectory",
+  "ClientIP": "3.80.218.146",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "AzureActiveDirectoryEventType": 1,
+  "ExtendedProperties": [
+    {"Name": "ResultStatusDetail", "Value": "Success"},
+    {"Name": "UserAgent", "Value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0 OS/10.0.20348"},
+    {"Name": "RequestType", "Value": "Login:reprocess"}
+  ],
+  "ErrorNumber": "65001",
+  "LogonError": "DelegationDoesNotExist"
+}
+```
+
+2. **FileSyncUploadedFull of suspicious file `passwords.txt`:**
+
+```json
+{
+  "CreationTime": "2024-07-17T12:49:07",
+  "Id": "3aa9b73e-38e8-4e57-9550-08dca7f12dad",
+  "Operation": "FileSyncUploadedFull",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 6,
+  "ResultStatus": "Succeeded",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "73.121.154.15",
+  "SourceFileName": "passwords.txt",
+  "ApplicationDisplayName": "OneDriveSync"
+}
+```
+
+3. **SharingPolicyChanged enabling anonymous sharing:**
+
+```json
+{
+  "CreationTime": "2024-07-17T19:03:14",
+  "Id": "217b304f-8ce0-4f8d-3b87-08dca6931c95",
+  "Operation": "SharingPolicyChanged",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "2603:1036:301:2088::5",
+  "ModifiedProperties": [
+    {"Name": "ShareUsingAnonymousLinks", "NewValue": "True", "OldValue": "False"}
+  ]
+}
+```
+
+4. **Multiple mailbox accesses and logins from IP `3.80.218.146` for `jsteele@usculturaldynamics.com` indicating successful access after suspicious login failure.**
+
+---
+
+### Conclusion
+
+- The suspicious activity suggests a possible **compromise of user `jsteele@usculturaldynamics.com`**.
+- The presence of a suspicious file named `passwords.txt` uploaded by this user and enabling anonymous sharing policy indicates potential data exfiltration or credential theft.
+- The suspicious login failure event with error `DelegationDoesNotExist` followed by successful logins and mailbox access from the same IP `3.80.218.146` suggests an attacker may have gained or attempted to gain unauthorized access.
+- The IP `3.80.218.146` is confirmed malicious due to successful authentication and suspicious events.
+- No brute force attack pattern is clearly visible in this log chunk, but the suspicious login failure event combined with successful access from the same IP is indicative of a targeted attack or exploitation.
+
+---
+
+**Recommendations:**
+
+- Immediately investigate and isolate user `jsteele@usculturaldynamics.com` account.
+- Block or monitor IP `3.80.218.146`.
+- Review and revoke any suspicious tokens or sessions associated with this user.
+- Audit sharing policies and disable anonymous sharing if not required.
+- Investigate the contents and origin of the `passwords.txt` file.
+- Enforce multi-factor authentication (MFA) if not already enabled.
+- Conduct a full incident response and forensic investigation on the user account and associated devices.
+
+---
+
+If further log chunks are available, review for additional suspicious activity or lateral movement indicators.
+
+---
+
+**End of Report**

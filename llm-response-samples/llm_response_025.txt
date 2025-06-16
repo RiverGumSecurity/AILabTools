@@ -1,0 +1,83 @@
+IncidentID: 20251206-152516  
+LogChunkID: 26/55
+
+---
+
+### Summary of Normal Activity
+
+- Multiple users (notably jkapoor@usculturaldynamics.com, jsteele@usculturaldynamics.com, splanck@usculturaldynamics.com) have successful logins and token issues across Microsoft 365 services including Exchange, Azure Active Directory, SharePoint, and Teams.
+- User activities include accessing mail items, sending emails, creating inbox rules, file previews, downloads, and mailbox configuration changes.
+- Conditional Access Policies and Mailbox Plans are regularly updated by system accounts (NT AUTHORITY\SYSTEM) as part of normal Exchange service operations.
+- Client IP addresses for successful authentications and activities are diverse and include both IPv4 and IPv6 addresses, consistent with normal user behavior.
+- User agents and device types appear typical (Windows 10, Firefox, Edge, Chrome, Android mobile).
+- No widespread failed login attempts or brute force patterns are evident in the provided logs.
+- Some failed login attempts are present but isolated and do not show persistence or follow-up successful logins from the same IP.
+
+---
+
+### Suspicious Activity Discovered
+
+- There is a **UserLoginFailed** event for user jsteele@usculturaldynamics.com from IP 54.219.139.191 on 2024-08-12T15:56:01 with error "InvalidUserNameOrPassword" (ErrorNumber 50126). This indicates a failed login attempt.
+- However, there are **no successful logins** recorded from this IP address (54.219.139.191).
+- No evidence of brute force attack patterns (such as multiple failed login attempts from the same IP or against multiple usernames) is found in this log chunk.
+- No successful authentication from suspicious IPs that had failed attempts.
+- No unusual or unauthorized mailbox rule creations or mailbox permission changes by non-system users.
+- No indication of compromised accounts or unauthorized access based on this log chunk.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- 54.219.139.191 (failed login attempt for jsteele@usculturaldynamics.com)
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- jsteele@usculturaldynamics.com (failed login attempt)
+
+---
+
+### Specific Log Data of Concern
+
+```json
+{
+  "CreationTime": "2024-08-12T15:56:01",
+  "Id": "3b6c25ad-68fb-441a-ae45-aa74af7b9700",
+  "Operation": "UserLoginFailed",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 15,
+  "ResultStatus": "Success",
+  "UserKey": "4e0ad150-8f74-4adb-a1fa-e9c10a6c4dfe",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "AzureActiveDirectory",
+  "ClientIP": "54.219.139.191",
+  "ObjectId": "00000002-0000-0ff1-ce00-000000000000",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "AzureActiveDirectoryEventType": 1,
+  "ExtendedProperties": [
+    {"Name": "ResultStatusDetail", "Value": "Success"},
+    {"Name": "UserAgent", "Value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0 OS/10.0.20348"},
+    {"Name": "UserAuthenticationMethod", "Value": "1"},
+    {"Name": "RequestType", "Value": "Login:login"}
+  ],
+  "ErrorNumber": "50126",
+  "LogonError": "InvalidUserNameOrPassword"
+}
+```
+
+---
+
+### Conclusion
+
+- The logs show mostly normal user activity with successful authentications and typical Exchange and SharePoint operations.
+- There is a single failed login attempt from IP 54.219.139.191 for user jsteele@usculturaldynamics.com but no successful login from this IP.
+- No evidence of brute force attacks or successful logins from suspicious IPs.
+- No clear evidence of compromise or account takeover in this log chunk.
+- Recommend continued monitoring for repeated failed login attempts or suspicious activity from new IPs.
+- Consider blocking or investigating IP 54.219.139.191 if further failed attempts occur.
+
+---
+
+If further log chunks are available, review for any escalation or additional suspicious activity.

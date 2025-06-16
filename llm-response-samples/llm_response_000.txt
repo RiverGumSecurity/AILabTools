@@ -1,0 +1,100 @@
+IncidentID: 20251206-151719  
+LogChunkID: 1/55
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful mailbox access operations by known users (e.g., `jsteele@usculturaldynamics.com`, `jkapoor@usculturaldynamics.com`, `nreynell@usculturaldynamics.com`, `jleary@usculturaldynamics.com`, `splanck@usculturaldynamics.com`).
+- Regular mailbox operations include reading, moving, and accessing mail items primarily from internal or expected IP addresses.
+- Several successful user login events from legitimate IP addresses and user agents, including Windows 10 devices using browsers like Edge, Chrome, and Firefox.
+- Routine administrative operations performed by `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)` related to mailbox and conditional access policy configurations.
+- OAuth token issuance events for legitimate users and applications.
+- SharePoint and OneDrive file access and modifications by legitimate users and service accounts.
+- Low severity security alerts related to user email submissions marking emails as not junk, which is typical user behavior.
+
+---
+
+### Suspicious Activity Discovered
+
+- Multiple **UserLoginFailed** events with `ResultStatus` marked as **Success** but with error details indicating authentication failures requiring strong authentication (`UserStrongAuthClientAuthNRequiredInterrupt`).
+- These failed login attempts originate from IP address `172.221.112.235`.
+- Despite failed login attempts, the same IP address (`172.221.112.235`) later shows multiple successful login events for user `jsteele@usculturaldynamics.com`.
+- The presence of failed login attempts followed by successful authentications from the same IP suggests possible brute force or credential stuffing attempts that eventually succeeded.
+- The IP `172.221.112.235` is associated with both failed and successful authentications, indicating potential malicious activity.
+- No other IP addresses show a similar pattern of failed then successful logins.
+- No explicit evidence of other brute force attacks or suspicious mailbox permission changes by unknown users.
+- The user `jsteele@usculturaldynamics.com` is the primary account involved in suspicious login activity.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- `172.221.112.235`
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- `jsteele@usculturaldynamics.com`
+
+---
+
+### Specific Log Data of Concern
+
+1. Failed login event with suspicious success status but error detail:
+
+```json
+{
+  "CreationTime": "2024-08-12T15:58:29",
+  "Id": "07f91da1-cbf1-4830-a4b4-70f492392b00",
+  "Operation": "UserLoginFailed",
+  "ResultStatus": "Success",
+  "UserId": "Not Available",
+  "ClientIP": "172.221.112.235",
+  "ErrorNumber": "50074",
+  "LogonError": "UserStrongAuthClientAuthNRequiredInterrupt"
+}
+```
+
+2. Subsequent successful login events from same IP and user:
+
+```json
+{
+  "CreationTime": "2024-08-12T15:59:21",
+  "Id": "35f6d461-dfae-49e0-80af-813453759100",
+  "Operation": "UserLoggedIn",
+  "ResultStatus": "Success",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "172.221.112.235"
+}
+```
+
+```json
+{
+  "CreationTime": "2024-08-12T15:58:26",
+  "Id": "f781b810-4bf2-40b9-ae47-3fd85a062b00",
+  "Operation": "UserLoggedIn",
+  "ResultStatus": "Success",
+  "UserId": "Not Available",
+  "ClientIP": "172.221.112.235"
+}
+```
+
+3. Multiple mailbox access operations by `jsteele@usculturaldynamics.com` from IP `172.221.112.235` shortly after successful login.
+
+---
+
+# Conclusion
+
+The logs show evidence of a possible brute force or credential stuffing attack targeting the user `jsteele@usculturaldynamics.com` from IP address `172.221.112.235`. The attacker experienced multiple failed login attempts requiring strong authentication but eventually succeeded in authenticating. The successful logins from this IP and user, followed by mailbox access, indicate a malicious compromise.
+
+---
+
+# Recommendations
+
+- Immediately investigate and potentially block IP `172.221.112.235`.
+- Force password reset and enable multi-factor authentication (MFA) for user `jsteele@usculturaldynamics.com`.
+- Review mailbox and account activity for any unauthorized changes or data exfiltration.
+- Monitor for further suspicious login attempts or anomalous activity.
+- Review and tighten conditional access policies to enforce strong authentication requirements.

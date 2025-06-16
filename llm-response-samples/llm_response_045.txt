@@ -1,0 +1,77 @@
+Incident Analysis Report  
+========================  
+IncidentID: 20251206-153145  
+LogChunkID: 46/55  
+
+1. Summary of Normal Activity  
+-----------------------------  
+- Multiple successful user logins observed for legitimate users such as jkapoor@usculturaldynamics.com, jsteele@usculturaldynamics.com, and splanck@usculturaldynamics.com from consistent IP addresses (e.g., 34.224.94.68, 73.121.154.15, 2603:10b6:806:203::6).  
+- Regular mailbox and file access operations by these users, including mail sending, mailbox policy changes, OneDrive file modifications, and SharePoint activities.  
+- Conditional Access Policies are regularly set and updated by system accounts (NT AUTHORITY\SYSTEM) indicating normal administrative activity.  
+- Token issuance (GATFRTokenIssue) events succeed regularly for known users without unusual IPs.  
+- User agents and device properties indicate use of standard browsers and operating systems (Windows 10, Firefox, Edge, Chrome).  
+
+2. Suspicious Activity Discovered  
+---------------------------------  
+- Multiple failed login attempts (UserLoginFailed) were recorded from IP address 3.80.218.146 targeting user jsteele@usculturaldynamics.com on 2024-08-12T15:56:34, with an unusual logon error "SsoArtifactRevoked".  
+- Despite the failed login event, subsequent successful logins from the same IP (3.80.218.146) for the same user (jsteele) were observed shortly after (2024-08-06T20:57:04 and 2024-08-06T19:10:52).  
+- The userId field in one successful login from 3.80.218.146 shows "Not Available" which is unusual and may indicate automated or anomalous login behavior.  
+- The IP 3.80.218.146 is not seen in other normal user activities and is distinct from usual user IPs.  
+- The presence of a failed login followed by successful logins from the same suspicious IP suggests a possible brute force or credential stuffing attack that succeeded.  
+- The "UserType" for one successful login from 3.80.218.146 is 4 (likely a service or non-interactive account), which is inconsistent with typical user logins and may indicate misuse or compromised session.  
+- No other IP addresses show failed login attempts or suspicious patterns in this log chunk.  
+
+3. IP Source Addresses Involved in Suspicious Activity  
+------------------------------------------------------  
+- 3.80.218.146  
+
+4. User Account Names Involved in Suspicious Activity  
+----------------------------------------------------  
+- jsteele@usculturaldynamics.com  
+
+5. Specific Log Data of Concern  
+-------------------------------  
+- Failed login event:  
+  {  
+    'CreationTime': '2024-08-12T15:56:34',  
+    'Id': 'f2509e32-7160-4611-8960-c14812f10e00',  
+    'Operation': 'UserLoginFailed',  
+    'ResultStatus': 'Success',  
+    'UserId': 'jsteele@usculturaldynamics.com',  
+    'ClientIP': '3.80.218.146',  
+    'LogonError': 'SsoArtifactRevoked'  
+  }  
+- Successful login events from same IP:  
+  {  
+    'CreationTime': '2024-08-06T20:57:04',  
+    'Operation': 'GATFRTokenIssue',  
+    'UserId': 'jsteele@usculturaldynamics.com',  
+    'ClientIP': '',  
+    'ResultStatus': 'Succeeded'  
+  },  
+  {  
+    'CreationTime': '2024-08-06T19:10:52',  
+    'Operation': 'GATFRTokenIssue',  
+    'UserId': 'jsteele@usculturaldynamics.com',  
+    'ClientIP': '',  
+    'ResultStatus': 'Succeeded'  
+  },  
+  {  
+    'CreationTime': '2024-08-06T15:13:47',  
+    'Operation': 'MailItemsAccessed',  
+    'UserId': 'jsteele@usculturaldynamics.com',  
+    'ClientIPAddress': '2603:10b6:5:fe::10',  
+    'ResultStatus': 'Succeeded'  
+  },  
+  {  
+    'CreationTime': '2024-08-06T20:57:04',  
+    'Operation': 'UserLoggedIn',  
+    'UserId': 'Not Available',  
+    'ClientIP': '3.80.218.146',  
+    'ResultStatus': 'Success',  
+    'UserType': 4  
+  }  
+
+Summary: The suspicious IP 3.80.218.146 shows evidence of failed login attempts followed by successful authentication events for user jsteele@usculturaldynamics.com, indicating a likely brute force or credential stuffing attack that succeeded. The anomalous "UserId" field and user type in some events reinforce suspicion of malicious activity. Immediate investigation and remediation actions are recommended for the user account and IP address.  
+
+--- End of Report ---

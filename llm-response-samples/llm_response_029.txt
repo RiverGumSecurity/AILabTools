@@ -1,0 +1,132 @@
+Incident Analysis Report  
+========================  
+**IncidentID:** 20251206-152626  
+**LogChunkID:** 30/55  
+
+---  
+
+### Summary of Normal Activity  
+- Multiple successful authentications and token issues for users `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com` from various IP addresses including `34.224.94.68`, `172.221.112.235`, `73.121.154.15`, `2600:387:f:818::4`, and others.  
+- Regular mailbox and file operations (MailItemsAccessed, FilePreviewed, FileUploaded, FileModified) by legitimate users.  
+- Administrative operations performed by `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)` related to mailbox and conditional access policy management.  
+- Use of multiple client applications such as OWA, Edge browser, MSWACONSync, and OAuth tokens issued successfully.  
+- No indication of mass failed login attempts or account lockouts in the majority of logs.  
+
+### Suspicious Activity Discovered  
+- A `UserLoginFailed` event for user `jsteele@usculturaldynamics.com` from IP address `54.219.139.191` on `2024-08-12T16:51:55` with error `FlowTokenExpired` (ErrorNumber: 50089). This indicates a failed login attempt.  
+- The same IP address `54.219.139.191` was involved in a successful token issue (`GATFRTokenIssue`) for `jsteele@usculturaldynamics.com` on `2024-08-09T13:29:19`.  
+- The presence of a failed login immediately after successful token issuance from the same IP suggests possible brute force or session hijacking attempts.  
+- Conditional Access Policies named "Default Policy" have been repeatedly set to "Disabled" state on multiple occasions (e.g., 2024-08-01, 2024-08-12), which could indicate weakening of security controls.  
+- The "PC-Test" Known Networks List policy is active but no direct suspicious activity tied to it.  
+- No other explicit brute force or multiple failed login attempts are visible in this chunk, but the combination of failed login with prior success from the same IP is suspicious.  
+
+### IP Source Addresses Involved in Suspicious Activity  
+- `54.219.139.191` (Failed login and prior successful token issuance for same user)  
+- Note: Other IPs with successful logins appear normal and consistent with user activity.  
+
+### User Account Names Involved in Suspicious Activity  
+- `jsteele@usculturaldynamics.com` (failed login and suspicious token activity)  
+
+### Specific Log Data of Concern  
+
+1. Failed login event:  
+```json
+{
+  "CreationTime": "2024-08-12T16:51:55",
+  "Id": "957febbf-3360-4f2b-bb1e-9a4db0db9200",
+  "Operation": "UserLoginFailed",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 15,
+  "ResultStatus": "Success",
+  "UserKey": "4e0ad150-8f74-4adb-a1fa-e9c10a6c4dfe",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "AzureActiveDirectory",
+  "ClientIP": "54.219.139.191",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "AzureActiveDirectoryEventType": 1,
+  "ExtendedProperties": [
+    {"Name": "ResultStatusDetail", "Value": "Success"},
+    {"Name": "UserAgent", "Value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0 OS/10.0.20348)"},
+    {"Name": "RequestType", "Value": "Login:login"}
+  ],
+  "ErrorNumber": "50089",
+  "LogonError": "FlowTokenExpired"
+}
+```
+
+2. Prior successful token issuance from same IP:  
+```json
+{
+  "CreationTime": "2024-08-09T13:29:19",
+  "Id": "1113b929-862d-4001-0e25-08dcb877464e",
+  "Operation": "GATFRTokenIssue",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 275,
+  "ResultStatus": "Succeeded",
+  "UserKey": "10032003A6A72A25",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "Exchange",
+  "ClientIP": "54.219.139.191",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ResourceURL": "https://outlook.office.com",
+  "UniqueTokenIdentifier": "Hb2ASVNu50OmQvQPyR8gAA"
+}
+```
+
+3. Conditional Access Policy disabled events:  
+```json
+{
+  "CreationTime": "2024-08-01T00:59:47",
+  "Id": "6339e8f0-67c6-4cac-678e-08dcb1c53d63",
+  "Operation": "Set-ConditionalAccessPolicy",
+  "ResultStatus": "True",
+  "UserId": "NT AUTHORITY\\SYSTEM (Microsoft.Exchange.ServiceHost)",
+  "Parameters": [
+    {"Name": "PolicyDetails", "Value": "{\"Version\":0,\"State\":\"Disabled\"}"},
+    {"Name": "DisplayName", "Value": "Default Policy"}
+  ]
+},
+{
+  "CreationTime": "2024-08-12T01:13:27",
+  "Id": "76552b52-f6b9-47fb-af1b-08dcba6bf8af",
+  "Operation": "Set-ConditionalAccessPolicy",
+  "ResultStatus": "True",
+  "UserId": "NT AUTHORITY\\SYSTEM (Microsoft.Exchange.ServiceHost)",
+  "Parameters": [
+    {"Name": "PolicyDetails", "Value": "{\"Version\":0,\"State\":\"Disabled\"}"},
+    {"Name": "DisplayName", "Value": "Default Policy"}
+  ]
+},
+{
+  "CreationTime": "2024-08-12T13:40:39",
+  "Id": "95f59940-45db-4e2e-6b60-08dcbad45aa9",
+  "Operation": "Set-ConditionalAccessPolicy",
+  "ResultStatus": "True",
+  "UserId": "NT AUTHORITY\\SYSTEM (Microsoft.Exchange.ServiceHost)",
+  "Parameters": [
+    {"Name": "PolicyDetails", "Value": "{\"Version\":0,\"State\":\"Disabled\"}"},
+    {"Name": "DisplayName", "Value": "Default Policy"}
+  ]
+}
+```
+
+---
+
+### Conclusion  
+- The logs show evidence of suspicious activity consistent with a possible brute force or token/session misuse attack against user `jsteele@usculturaldynamics.com` from IP address `54.219.139.191`.  
+- The failed login event with "FlowTokenExpired" error immediately following successful token issuance from the same IP is suspicious and may indicate attempted unauthorized access or token replay.  
+- The repeated disabling of the "Default Policy" Conditional Access Policy is concerning and may represent an attacker weakening security controls to facilitate further compromise.  
+- No other user accounts or IP addresses show clear signs of compromise in this log chunk.  
+
+### Recommendations  
+- Investigate the source and legitimacy of IP `54.219.139.191`.  
+- Review and restore Conditional Access Policies to enforce security controls.  
+- Conduct a password reset and multi-factor authentication enforcement for `jsteele@usculturaldynamics.com`.  
+- Monitor for further suspicious login attempts or policy changes.  
+- Review other log chunks for additional evidence of brute force or lateral movement.  
+
+---
+
+End of Report

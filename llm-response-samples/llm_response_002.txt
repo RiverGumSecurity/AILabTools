@@ -1,0 +1,139 @@
+IncidentID: 20251206-151803  
+LogChunkID: 3/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful authentications (UserLoggedIn events with ResultStatus: Success) for users "jsteele@usculturaldynamics.com" and "jkapoor@usculturaldynamics.com" from various IP addresses including:
+  - 73.121.154.15
+  - 172.221.112.235
+  - 34.224.94.68
+  - 13.57.246.62
+  - 18.212.101.151
+  - 2603:1036:301:2088::5 (IPv6)
+  - 2600:387:15:1f16::b (IPv6)
+  - 23.101.184.74
+- These users have performed normal operations such as mail access, token issuance, mailbox settings, OneDrive file modifications, and conditional access policy changes by system accounts.
+- The logs show standard Exchange and Azure Active Directory operations with successful OAuth2 authorizations, token issues, and mailbox accesses.
+- The user "jkapoor@usculturaldynamics.com" also added the user "jsteele@usculturaldynamics.com" on 2024-07-17, indicating legitimate user management activity.
+
+---
+
+### Suspicious Activity Discovered
+
+- There is a **UserLoginFailed** event at 2024-08-12T16:43:20 for user "jsteele@usculturaldynamics.com" from IP address 3.80.218.146 with error "InvalidUserNameOrPassword". This indicates a failed login attempt.
+- However, the same IP address (3.80.218.146) also has a successful login event for "jsteele@usculturaldynamics.com" at 2024-08-06T21:02:25 and other successful logins, indicating the IP is associated with successful authentication.
+- The presence of failed login attempts followed by successful logins from the same IP address may indicate a **brute force or credential stuffing attack** that succeeded.
+- The IP 3.80.218.146 is suspicious because it shows both failed and successful logins for the same user, which is a hallmark of malicious activity.
+- Additionally, there is a phishing email detected and delivered as spam to "jsteele@usculturaldynamics.com" on 2024-08-08 from sender IP 199.15.214.48, indicating possible external threat activity targeting the user.
+- Several conditional access policies were set or modified by the system account "NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)" with some policies disabled or changed, which could be normal but should be reviewed for policy changes that weaken security.
+- The resource URLs in token issuance include suspicious endpoints such as "https://webshell.suite.office.com" and "https://dataservice.o365filtering.com" which are unusual and may indicate use of non-standard or potentially malicious applications or services.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- 3.80.218.146 (failed and successful login for same user)
+- 199.15.214.48 (phishing email sender IP)
+- Possibly suspicious:  
+  - 2600:387:15:1f16::b (IPv6) - used in mail access and token issue, unusual IPv6 address to monitor
+  - 23.101.184.74 - OneDrive file modification, unusual client IP to monitor
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- jsteele@usculturaldynamics.com (target of failed login attempts, phishing, and suspicious token/resource URLs)
+- jkapoor@usculturaldynamics.com (legitimate admin user, no direct suspicious activity but involved in user addition)
+
+---
+
+### Specific Log Data of Concern
+
+1. Failed login event with subsequent successful login from same IP:
+
+```json
+{
+  "CreationTime": "2024-08-12T16:43:20",
+  "Id": "94b9b45a-aa9b-4ea4-bdfa-793d42e96400",
+  "Operation": "UserLoginFailed",
+  "ResultStatus": "Success",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "3.80.218.146",
+  "LogonError": "InvalidUserNameOrPassword"
+}
+```
+
+and successful login:
+
+```json
+{
+  "CreationTime": "2024-08-06T21:02:25",
+  "Id": "340ef850-61b1-4e62-bc27-b6b9614e8b00",
+  "Operation": "UserLoggedIn",
+  "ResultStatus": "Success",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "3.80.218.146"
+}
+```
+
+2. Phishing email detected and delivered as spam:
+
+```json
+{
+  "CreationTime": "2024-08-08T18:28:18",
+  "Id": "3f36bfc2-2633-9343-b34c-ff429cab034f",
+  "Operation": "TIMailData",
+  "UserId": "ThreatIntel",
+  "ResultStatus": "DeliveredAsSpam",
+  "Recipients": ["jsteele@usculturaldynamics.com"],
+  "SenderIp": "199.15.214.48",
+  "Subject": "Don’t Get Left Behind: Uncover AI’s Dual Impact on Cybersecurity –Register Now!",
+  "Verdict": "Phish"
+}
+```
+
+3. Token issuance with suspicious resource URLs:
+
+```json
+{
+  "CreationTime": "2024-08-06T19:15:51",
+  "Id": "4fdd5e37-7964-4ee1-3de5-08dcb64c2f82",
+  "Operation": "GATFRTokenIssue",
+  "ResultStatus": "Succeeded",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ResourceURL": "https://webshell.suite.office.com"
+}
+```
+
+and
+
+```json
+{
+  "CreationTime": "2024-08-07T20:57:36",
+  "Id": "b23020b5-9396-4dbf-680f-08dcb72390d4",
+  "Operation": "GATFRTokenIssue",
+  "ResultStatus": "Succeeded",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ResourceURL": "https://dataservice.o365filtering.com"
+}
+```
+
+---
+
+# Conclusion
+
+- The logs indicate a likely **successful brute force or credential stuffing attack** on user "jsteele@usculturaldynamics.com" from IP address 3.80.218.146, as evidenced by failed login attempts followed by successful login from the same IP.
+- The phishing email targeting the same user further supports the presence of external threat activity.
+- Suspicious token issuance to unusual resource URLs may indicate use of malicious or unauthorized applications.
+- Immediate actions recommended:
+  - Investigate and block IP 3.80.218.146.
+  - Review and reset credentials for "jsteele@usculturaldynamics.com".
+  - Review conditional access policies for unauthorized changes.
+  - Conduct phishing awareness and scan for compromise indicators in the mailbox.
+  - Monitor other suspicious IPs and unusual resource URLs for further activity.
+
+---
+
+If you require further detailed analysis or correlation with other log chunks, please advise.

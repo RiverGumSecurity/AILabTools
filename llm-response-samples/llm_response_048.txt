@@ -1,0 +1,114 @@
+IncidentID: 20251206-153302  
+LogChunkID: 49/55
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful mailbox operations (Set-Mailbox, Set-MailboxPlan) performed by system accounts (NT AUTHORITY\SYSTEM) related to Exchange service host, indicating routine administrative or system maintenance.
+- Regular user activities by known users `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com` including:
+  - MailItemsAccessed with successful results from various IP addresses.
+  - GATFRTokenIssue (token issuance) events mostly without client IPs but showing successful authentication.
+  - File operations on OneDrive and SharePoint such as FileAccessed, FileUploaded, FileModified, FileRenamed.
+  - SensitivityLabelApplied events on emails, indicating data classification and protection policies in use.
+  - UserLoggedIn events with successful status from expected IP addresses.
+- The user `jsteele@usculturaldynamics.com` accesses mail and files from a consistent set of IP addresses, including:
+  - IPv6 addresses: `2603:10b6:8:21e::10`, `2603:1036:301:2088::5`, `2600:387:15:1f16::b`
+  - IPv4 addresses: `172.221.112.235`, `73.121.154.15`, `3.80.218.146`, `52.108.181.1`, `70.37.55.42`
+- The user `jkapoor@usculturaldynamics.com` also shows normal activity with successful token issuance and mail access from IPv6 addresses like `2603:10b6:303:71::13` and IPv4 `34.224.94.68`.
+- No failed login attempts or suspicious authentication failures are logged in this chunk.
+- Conditional Access Policies are being set and updated by system accounts, indicating active policy management.
+
+---
+
+### Suspicious Activity Discovered
+
+- Presence of a file named `passwords.txt` uploaded by user `jsteele@usculturaldynamics.com` to OneDrive on 2024-07-23 from IP `73.121.154.15`. Uploading a file with this name is suspicious and may indicate credential harvesting or exfiltration.
+- The IP address `52.108.181.1` is seen accessing files (`FileAccessed` operation) for user `jsteele@usculturaldynamics.com` on OneDrive and SharePoint. This IP is not seen in other normal user login or mail access events and may be anomalous.
+- The IP `52.108.181.1` is associated with OAuth authentication but no explicit user login event is recorded from this IP, suggesting possible token reuse or unauthorized access.
+- No brute force attack patterns (multiple failed login attempts) are visible in this log chunk.
+- No evidence of suspicious login from unknown usernames or failed authentication attempts.
+- The user `jsteele@usculturaldynamics.com` has multiple successful logins and mail accesses from IP `172.221.112.235`, which appears to be a normal user IP.
+- No suspicious Conditional Access Policy changes detected; policies appear to be standard or disabled as per normal admin operations.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- `52.108.181.1` — Accessing files on OneDrive and SharePoint for user `jsteele@usculturaldynamics.com`, no matching successful login event, suspicious access.
+- `73.121.154.15` — Upload of suspicious file `passwords.txt` by user `jsteele@usculturaldynamics.com`.
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- `jsteele@usculturaldynamics.com` — Uploaded suspicious file `passwords.txt` and had file access from suspicious IP `52.108.181.1`.
+- No other user accounts show suspicious activity in this log chunk.
+
+---
+
+### Specific Log Data of Concern
+
+1. File upload of suspicious file:
+
+```json
+{
+  "CreationTime": "2024-07-23T11:57:27",
+  "Id": "b5b68167-5fd3-4cda-d995-08dcab0e9fc4",
+  "Operation": "FileUploaded",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 6,
+  "UserKey": "i:0h.f|membership|10032003a6a72a25@live.com",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "OneDrive",
+  "ClientIP": "73.121.154.15",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "AuthenticationType": "FormsCookieAuth",
+  "BrowserName": "Edge",
+  "BrowserVersion": "126.0.0.0",
+  "EventSource": "SharePoint",
+  "ItemType": "File",
+  "SourceFileName": "passwords.txt",
+  "SiteUrl": "https://usculturaldynamicsgmail-my.sharepoint.com/personal/jsteele_usculturaldynamics_com/",
+  "SourceRelativeUrl": "Documents/Misc",
+  "ApplicationDisplayName": "OneDrive Web App (modern)"
+}
+```
+
+2. File access from suspicious IP:
+
+```json
+{
+  "CreationTime": "2024-08-05T13:14:16",
+  "Id": "548a5dc5-5757-4918-9505-08dcb55081e0",
+  "Operation": "FileAccessedExtended",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 6,
+  "UserKey": "i:0h.f|membership|10032003a6a72a25@live.com",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "OneDrive",
+  "ClientIP": "52.108.181.1",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "AuthenticationType": "OAuth",
+  "EventSource": "SharePoint",
+  "ItemType": "File",
+  "SourceFileName": "USCD To-Do.onetoc2",
+  "SiteUrl": "https://usculturaldynamicsgmail-my.sharepoint.com/personal/jsteele_usculturaldynamics_com/"
+}
+```
+
+---
+
+### Conclusion
+
+- The logs indicate normal user activity for `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com` with successful authentications and mail/file accesses.
+- There is no evidence of brute force attacks or failed login attempts in this log chunk.
+- Suspicious activity is identified involving the upload of a file named `passwords.txt` by user `jsteele@usculturaldynamics.com` from IP `73.121.154.15`.
+- Additionally, file access from IP `52.108.181.1` for the same user without corresponding login events suggests possible unauthorized access or token misuse.
+- These suspicious activities warrant further investigation to determine if credentials have been compromised or if unauthorized access has occurred.
+
+---
+
+Please advise on next steps for deeper investigation or containment.

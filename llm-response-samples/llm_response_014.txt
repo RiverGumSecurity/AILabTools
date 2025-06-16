@@ -1,0 +1,116 @@
+Incident Analysis Report  
+========================  
+**IncidentID:** 20251206-152155  
+**LogChunkID:** 15/55  
+
+---  
+
+### Summary of Normal Activity  
+- Multiple successful token issuance events (Operation: GATFRTokenIssue) for users `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com` without associated client IP addresses, which is typical for internal or service-based token operations.  
+- Regular mailbox access (Operation: MailItemsAccessed) by users `jsteele@usculturaldynamics.com` and `jkapoor@usculturaldynamics.com` from various IPv4 and IPv6 addresses, consistent with normal user activity.  
+- Several conditional access policy changes and mailbox plan settings performed by `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)`, which is expected system-level activity.  
+- User login successes for `jsteele@usculturaldynamics.com` from IP `172.221.112.235` and `73.121.154.15` with valid user agents and OAuth2 authorization flows.  
+- File uploads and modifications in OneDrive and SharePoint by `jsteele@usculturaldynamics.com` from known IPs, consistent with normal user operations.  
+
+### Suspicious Activity Discovered  
+- There is a log entry with `Operation: UserLoginFailed` for user `jsteele@usculturaldynamics.com` from IP address `73.121.154.15` indicating an invalid username or password error (LogonError: InvalidUserNameOrPassword). However, this IP address also has multiple successful login and mailbox access events for the same user, indicating possible brute force or credential guessing attempts followed by successful compromise.  
+- No other explicit failed login attempts or brute force patterns are evident in this log chunk, but the presence of failed login followed by successful access from the same IP is suspicious.  
+- The IP address `3.80.218.146` appears in successful mailbox access events for `jsteele@usculturaldynamics.com` but is not seen in login events, which could indicate use of a valid session token or token replay, potentially suspicious if this IP is not recognized as normal for the user.  
+- Multiple conditional access policies are being set or modified by system accounts, but these appear legitimate and consistent with administrative maintenance.  
+
+### IP Source Addresses Involved in Suspicious Activity  
+- `73.121.154.15` (Failed login followed by successful login and mailbox access for user `jsteele@usculturaldynamics.com`)  
+- `3.80.218.146` (Successful mailbox access for `jsteele@usculturaldynamics.com` without corresponding login event)  
+
+### User Account Names Involved in Suspicious Activity  
+- `jsteele@usculturaldynamics.com`  
+
+### Specific Log Data of Concern  
+
+1. Failed login event:  
+```json
+{
+  "CreationTime": "2024-07-17T19:08:20",
+  "Id": "d9e82af9-b542-43ce-9a9d-d5192d314700",
+  "Operation": "UserLoginFailed",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 15,
+  "ResultStatus": "Success",
+  "UserKey": "4e0ad150-8f74-4adb-a1fa-e9c10a6c4dfe",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "AzureActiveDirectory",
+  "ClientIP": "73.121.154.15",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "AzureActiveDirectoryEventType": 1,
+  "ExtendedProperties": [
+    {"Name": "ResultStatusDetail", "Value": "Success"},
+    {"Name": "UserAgent", "Value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; WebView/3.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.22631"},
+    {"Name": "UserAuthenticationMethod", "Value": "1"},
+    {"Name": "RequestType", "Value": "Login:login"}
+  ],
+  "ErrorNumber": "50126",
+  "LogonError": "InvalidUserNameOrPassword"
+}
+```
+
+2. Successful login event from same IP:  
+```json
+{
+  "CreationTime": "2024-07-24T12:25:42",
+  "Id": "5f6355c0-3eb5-4b08-b6c6-498aa9872d00",
+  "Operation": "UserLoggedIn",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 15,
+  "ResultStatus": "Success",
+  "UserKey": "4e0ad150-8f74-4adb-a1fa-e9c10a6c4dfe",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "AzureActiveDirectory",
+  "ClientIP": "73.121.154.15",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "AzureActiveDirectoryEventType": 1,
+  "ExtendedProperties": [
+    {"Name": "ResultStatusDetail", "Value": "Redirect"},
+    {"Name": "UserAgent", "Value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0"},
+    {"Name": "RequestType", "Value": "OAuth2:Authorize"}
+  ],
+  "ErrorNumber": "0"
+}
+```
+
+3. Mailbox access from suspicious IP without login event:  
+```json
+{
+  "CreationTime": "2024-08-06T20:57:32",
+  "Id": "a436021f-c1c6-4004-90b6-b65db1eb87de",
+  "Operation": "MailItemsAccessed",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 50,
+  "ResultStatus": "Succeeded",
+  "UserKey": "10032003A6A72A25",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "Exchange",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIPAddress": "3.80.218.146",
+  "ClientInfoString": "Client=OWA;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0;",
+  "ExternalAccess": false
+}
+```
+
+---
+
+### Conclusion  
+- The evidence indicates a possible brute force or credential guessing attempt against user `jsteele@usculturaldynamics.com` from IP `73.121.154.15`, followed by successful authentication and mailbox access from the same IP, which is suspicious and potentially malicious.  
+- The IP `3.80.218.146` accessing mailbox data without a corresponding login event may indicate token reuse or session hijacking.  
+- Immediate actions recommended:  
+  - Investigate the IP addresses `73.121.154.15` and `3.80.218.146` for reputation and geolocation.  
+  - Conduct a password reset and multi-factor authentication enforcement for `jsteele@usculturaldynamics.com`.  
+  - Review mailbox and SharePoint activity for data exfiltration or unauthorized changes.  
+  - Monitor for further suspicious login attempts or anomalous activity from these IPs or user accounts.  
+
+---
+
+Report prepared by: SOC Incident Response Team  
+Date: 2024-08-12

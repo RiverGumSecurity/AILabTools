@@ -1,0 +1,105 @@
+IncidentID: 20251206-152135  
+LogChunkID: 14/55
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful authentication events for users `jsteele@usculturaldynamics.com`, `jkapoor@usculturaldynamics.com`, and `gwootton@usculturaldynamics.com` from various IP addresses including `73.121.154.15`, `34.224.94.68`, `2603:10b6:5:fe::10`, and others.
+- Regular Exchange and SharePoint operations such as token issuance, mailbox access, mailbox plan settings, conditional access policy changes by system accounts (`NT AUTHORITY\SYSTEM`), and file/list access.
+- User logins mostly successful with expected client apps and browsers (Edge, Firefox, Chrome) and typical device OS (Windows 10, Android).
+- Some administrative and system configuration changes performed by Exchange service accounts, which appear legitimate.
+- Alerts of low severity related to user email submissions (e.g., "Email reported by user as not junk") with no indication of malicious activity.
+
+---
+
+### Suspicious Activity Discovered
+
+- Presence of a **UserLoginFailed** event for user `jsteele@usculturaldynamics.com` from IP address `54.219.139.191` with error `InvalidUserNameOrPassword` (LogonError: 50126) indicating a failed login attempt.
+- The same IP address `54.219.139.191` later shows a **successful** MailItemsAccessed event for user `jsteele@usculturaldynamics.com`, indicating a successful authentication after a failed login attempt.
+- This pattern suggests a possible **brute force or credential guessing attack** from IP `54.219.139.191` targeting user `jsteele@usculturaldynamics.com`.
+- The successful authentication from the suspicious IP indicates potential compromise or unauthorized access.
+- No other failed login attempts or brute force patterns are evident in this log chunk for other IPs or users.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- `54.219.139.191` (Failed login followed by successful access for user `jsteele@usculturaldynamics.com`)
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- `jsteele@usculturaldynamics.com`
+
+---
+
+### Specific Log Data of Concern
+
+1. Failed login event (UserLoginFailed) from suspicious IP:
+
+```json
+{
+  "CreationTime": "2024-08-12T16:13:35",
+  "Id": "d03bc983-01b8-41be-8cb9-0c46ba1c7c00",
+  "Operation": "UserLoginFailed",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 15,
+  "ResultStatus": "Success",
+  "UserKey": "4e0ad150-8f74-4adb-a1fa-e9c10a6c4dfe",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "AzureActiveDirectory",
+  "ClientIP": "54.219.139.191",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "AzureActiveDirectoryEventType": 1,
+  "ExtendedProperties": [
+    {"Name": "ResultStatusDetail", "Value": "Success"},
+    {"Name": "UserAgent", "Value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0 OS/10.0.20348"},
+    {"Name": "UserAuthenticationMethod", "Value": "1"},
+    {"Name": "RequestType", "Value": "Login:login"}
+  ],
+  "ErrorNumber": "50126",
+  "LogonError": "InvalidUserNameOrPassword"
+}
+```
+
+2. Successful mail access event from the same suspicious IP:
+
+```json
+{
+  "CreationTime": "2024-08-07T23:12:41",
+  "Id": "8ca06aea-168d-4263-a9a6-8b093fe231d2",
+  "Operation": "MailItemsAccessed",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 50,
+  "ResultStatus": "Succeeded",
+  "UserKey": "10032003A6A72A25",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "Exchange",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIPAddress": "54.219.139.191",
+  "ClientInfoString": "Client=OWA;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0;",
+  "ExternalAccess": False,
+  "OperationCount": 2
+}
+```
+
+---
+
+### Conclusion
+
+- The logs show evidence of a likely brute force or credential guessing attack against user `jsteele@usculturaldynamics.com` from IP `54.219.139.191`.
+- The attacker initially failed to login but subsequently succeeded in accessing mailbox items, indicating a potential compromise.
+- Immediate investigation and remediation actions are recommended:
+  - Review and reset the password for `jsteele@usculturaldynamics.com`.
+  - Investigate the IP `54.219.139.191` for further suspicious activity.
+  - Review conditional access policies and consider blocking or restricting access from suspicious IPs.
+  - Enable multi-factor authentication (MFA) if not already enabled.
+  - Conduct a thorough mailbox audit for unauthorized activity.
+
+---
+
+If you require further detailed analysis or assistance with remediation steps, please advise.

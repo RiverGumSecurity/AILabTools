@@ -1,0 +1,156 @@
+IncidentID: 20251206-153418  
+LogChunkID: 52/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful logins and mailbox accesses by legitimate users such as:
+  - User: `jsteele@usculturaldynamics.com`
+  - User: `jkapoor@usculturaldynamics.com`
+  - User: `gwootton@usculturaldynamics.com`
+  - User: `justin@blackhillsinfosec.com`
+- Activities include mailbox access, file uploads, file modifications, mailbox settings changes, and conditional access policy updates.
+- Most logins and operations originate from a variety of IP addresses consistent with normal business operations, including IPv4 and IPv6 addresses.
+- Several administrative operations performed by `NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)` which is normal for Exchange backend operations.
+- Use of OAuth and other standard authentication methods.
+- Use of Microsoft Exchange, OneDrive, SharePoint, and Azure Active Directory workloads.
+- Use of MFA (Multi-Factor Authentication) indicated by updates to StrongAuthenticationPhoneAppDetail for user `jsteele@usculturaldynamics.com`.
+- No unusual or unexpected changes to mailbox plans or policies outside normal administrative updates.
+
+---
+
+### Suspicious Activity Discovered
+
+- Presence of a **UserLoginFailed** event with `ResultStatus` marked as "Success" but with an error number `50074` and logon error `UserStrongAuthClientAuthNRequiredInterrupt` from IP `73.121.154.15` for user `jsteele@usculturaldynamics.com`. This indicates an interrupted login due to strong authentication requirements, possibly a failed MFA or conditional access enforcement.
+- Multiple successful logins and mailbox accesses from IP `73.121.154.15` for user `jsteele@usculturaldynamics.com` shortly before and after this failed login event, indicating possible brute force or replay attempts.
+- The IP `73.121.154.15` is involved in both failed and successful authentications for the same user, which is suspicious.
+- Addition of an inbox rule by user `gwootton@usculturaldynamics.com` that forwards emails to `hal@blackhillsinfosec.com`. This could be a legitimate security monitoring rule, but it is unusual and should be verified.
+- Multiple conditional access policies are set and updated, some with "Disabled" state, which could indicate a weakening of security controls.
+- Some mailbox deletions and hard deletes performed by `jsteele@usculturaldynamics.com` from IP `3.80.218.146`, which might be suspicious if unexpected.
+- The user `jsteele@usculturaldynamics.com` has multiple file and mailbox operations from diverse IPs including `73.121.154.15`, `172.221.112.235`, `3.80.218.146`, and IPv6 addresses, which could indicate account compromise or use from multiple locations.
+- The user `jsteele@usculturaldynamics.com` had their StrongAuthenticationPhoneAppDetail updated with a last authenticated timestamp changing from `2024-07-19T12:53:42` to `2024-08-06T19:10:46`, indicating recent MFA activity.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- `73.121.154.15`  
+  - Failed login with strong auth interrupt, followed by successful logins and mailbox access for `jsteele@usculturaldynamics.com`.
+- `3.80.218.146`  
+  - Mailbox access and hard delete operations by `jsteele@usculturaldynamics.com`.
+- `172.221.112.235`  
+  - Successful login and mailbox operations for `jsteele@usculturaldynamics.com`.
+- `2603:10b6:5:fe::10` and other IPv6 addresses related to `jsteele@usculturaldynamics.com` mailbox access.
+- `44.217.35.149`  
+  - Mailbox access and inbox rule update by `gwootton@usculturaldynamics.com`.
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- `jsteele@usculturaldynamics.com`  
+  - Multiple failed and successful logins from suspicious IPs, mailbox deletions, and file operations.
+- `gwootton@usculturaldynamics.com`  
+  - Created an inbox rule forwarding emails externally to `hal@blackhillsinfosec.com`.
+- `jkapoor@usculturaldynamics.com`  
+  - Some mailbox access and user update operations; no direct suspicious activity but included due to mailbox access from diverse IPs.
+- `hal@blackhillsinfosec.com`  
+  - Recipient of forwarded emails from `gwootton@usculturaldynamics.com` inbox rule (potentially a security monitor or suspicious if unauthorized).
+
+---
+
+### Specific Log Data of Concern
+
+1. **Failed login with strong auth interrupt:**
+
+```json
+{
+  "CreationTime": "2024-07-19T12:53:29",
+  "Operation": "UserLoginFailed",
+  "ResultStatus": "Success",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "73.121.154.15",
+  "ErrorNumber": "50074",
+  "LogonError": "UserStrongAuthClientAuthNRequiredInterrupt"
+}
+```
+
+2. **Successful login from same IP shortly after:**
+
+```json
+{
+  "CreationTime": "2024-07-19T19:54:00",
+  "Operation": "UserLoggedIn",
+  "ResultStatus": "Success",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "73.121.154.15"
+}
+```
+
+3. **Mailbox hard delete by `jsteele@usculturaldynamics.com` from IP `3.80.218.146`:**
+
+```json
+{
+  "CreationTime": "2024-08-06T21:07:55",
+  "Operation": "HardDelete",
+  "ResultStatus": "Succeeded",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "3.80.218.146",
+  "Folder": "\\Drafts",
+  "Subject": "Re: Invoices"
+}
+```
+
+4. **Inbox rule added by `gwootton@usculturaldynamics.com` forwarding emails externally:**
+
+```json
+{
+  "CreationTime": "2024-07-16T21:31:44",
+  "Operation": "UpdateInboxRules",
+  "ResultStatus": "Succeeded",
+  "UserId": "gwootton@usculturaldynamics.com",
+  "ClientIP": "44.217.35.149",
+  "RuleActions": [
+    {
+      "ActionType": "Forward",
+      "Recipients": ["hal@blackhillsinfosec.com"]
+    }
+  ]
+}
+```
+
+5. **StrongAuthenticationPhoneAppDetail updated for `jsteele@usculturaldynamics.com` indicating recent MFA activity:**
+
+```json
+{
+  "CreationTime": "2024-08-06T19:10:46",
+  "Operation": "Update user.",
+  "UserId": "ServicePrincipal_3a75d5ce-a5b5-4c4c-a9bb-69a62431eb30",
+  "Target": "jsteele@usculturaldynamics.com",
+  "ModifiedProperties": [
+    {
+      "Name": "StrongAuthenticationPhoneAppDetail",
+      "NewValue": "...LastAuthenticatedTimestamp: 2024-08-06T19:10:46.4106333Z..."
+    }
+  ]
+}
+```
+
+---
+
+### Conclusion
+
+- The logs show evidence of suspicious activity consistent with a **potential brute force or credential stuffing attack** against user `jsteele@usculturaldynamics.com` originating from IP `73.121.154.15` (failed login followed by successful login).
+- The same IP address was involved in successful authentication, indicating possible compromise.
+- Additional suspicious activity includes mailbox hard deletes and creation of forwarding inbox rules, which could indicate attacker attempts to exfiltrate data or cover tracks.
+- Multiple IP addresses accessing the same user account from geographically diverse locations may indicate account compromise or unauthorized access.
+- Immediate investigation and remediation recommended:
+  - Review and block suspicious IPs (especially `73.121.154.15` and `3.80.218.146`).
+  - Reset passwords and enforce MFA for affected users.
+  - Review mailbox rules and audit mailbox deletions.
+  - Monitor for further suspicious activity.
+
+---
+
+If you require further detailed analysis or specific remediation steps, please advise.

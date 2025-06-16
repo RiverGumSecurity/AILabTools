@@ -1,0 +1,112 @@
+IncidentID: 20251206-152447  
+LogChunkID: 25/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful user logins and token issues for users in the organization "USCulturalDynamicsgmail.onmicrosoft.com".
+- Users involved primarily:  
+  - jsteele@usculturaldynamics.com  
+  - jkapoor@usculturaldynamics.com  
+  - splanck@usculturaldynamics.com  
+- Common operations include:  
+  - Accessing mail items  
+  - Sending emails  
+  - Viewing SharePoint pages and files  
+  - Setting mailbox plans and conditional access policies by system accounts (NT AUTHORITY\SYSTEM)  
+- Client IP addresses for normal activity include:  
+  - 73.121.154.15  
+  - 34.224.94.68  
+  - 172.221.112.235  
+  - Various IPv6 addresses associated with users  
+- Authentication methods mostly OAuth and FormsCookieAuth, with successful token issuance and login events.
+- Conditional Access Policies are being set and updated regularly by system accounts, indicating normal policy management.
+
+---
+
+### Suspicious Activity Discovered
+
+- There is a **UserLoginFailed** event recorded on 2024-08-12T15:58:13 for user "jsteele@usculturaldynamics.com" from IP address 172.221.112.235.  
+  - The log shows a "UserStrongAuthClientAuthNRequiredInterrupt" error, indicating a failed login attempt requiring strong authentication.  
+- This IP address (172.221.112.235) also has multiple successful login and token issuance events for the same user "jsteele@usculturaldynamics.com".  
+- The presence of a failed login followed by successful logins from the same IP could indicate a brute force or password guessing attempt that eventually succeeded, or a legitimate user encountering MFA challenges.  
+- No other explicit failed login bursts or brute force patterns are evident in this log chunk.  
+- No unknown or suspicious usernames are seen; all usernames are consistent with known users.  
+- No suspicious IP addresses outside the normal range except the 172.221.112.235 which had a failed login but also successful logins.  
+- The failed login event has a "ResultStatus" of "Success" but the "LogonError" indicates a failure in strong authentication, which is unusual and suspicious.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- 172.221.112.235 (Failed login followed by successful logins for user jsteele@usculturaldynamics.com)
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- jsteele@usculturaldynamics.com
+
+---
+
+### Specific Log Data of Concern
+
+```json
+{
+  "CreationTime": "2024-08-12T15:58:13",
+  "Id": "202f8a8b-9ede-41ae-b2d9-4c7ef4be1c00",
+  "Operation": "UserLoginFailed",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 15,
+  "ResultStatus": "Success",
+  "UserKey": "4e0ad150-8f74-4adb-a1fa-e9c10a6c4dfe",
+  "UserType": 0,
+  "Version": 1,
+  "Workload": "AzureActiveDirectory",
+  "ClientIP": "172.221.112.235",
+  "ObjectId": "01cb2876-7ebd-4aa4-9cc9-d28bd4d359a9",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "AzureActiveDirectoryEventType": 1,
+  "ExtendedProperties": [
+    {"Name": "ResultStatusDetail", "Value": "Success"},
+    {"Name": "UserAgent", "Value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; WebView/3.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.22631"},
+    {"Name": "UserAuthenticationMethod", "Value": "1"},
+    {"Name": "RequestType", "Value": "Login:login"}
+  ],
+  "ModifiedProperties": [],
+  "Actor": [
+    {"ID": "4e0ad150-8f74-4adb-a1fa-e9c10a6c4dfe", "Type": 0},
+    {"ID": "jsteele@usculturaldynamics.com", "Type": 5}
+  ],
+  "ActorContextId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "ActorIpAddress": "172.221.112.235",
+  "InterSystemsId": "2b95fdb5-7601-279d-b556-5c388552fd06",
+  "IntraSystemId": "202f8a8b-9ede-41ae-b2d9-4c7ef4be1c00",
+  "SupportTicketId": "",
+  "Target": [{"ID": "01cb2876-7ebd-4aa4-9cc9-d28bd4d359a9", "Type": 0}],
+  "TargetContextId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "ApplicationId": "29d9ed98-a469-4536-ade2-f981bc1d605e",
+  "DeviceProperties": [
+    {"Name": "OS", "Value": "Windows10"},
+    {"Name": "BrowserType", "Value": "Edge"},
+    {"Name": "SessionId", "Value": "363f81d8-87dc-43a5-9a8c-8c833b5e2d11"}
+  ],
+  "ErrorNumber": "50074",
+  "LogonError": "UserStrongAuthClientAuthNRequiredInterrupt"
+}
+```
+
+---
+
+### Conclusion
+
+- The log shows a suspicious failed login event for user "jsteele@usculturaldynamics.com" from IP 172.221.112.235 that is followed by successful authentication events from the same IP.
+- This pattern suggests a possible brute force or password guessing attempt that succeeded or a bypass of strong authentication.
+- Given the successful authentication from the same IP after failure, this IP and user account should be considered compromised or at high risk.
+- Recommend immediate investigation on user "jsteele@usculturaldynamics.com" account activity, password reset, and review of conditional access policies and MFA enforcement.
+- Monitor and possibly block or further analyze IP 172.221.112.235 for malicious activity.
+
+---
+
+If further log chunks are available, review for additional failed login attempts or suspicious activities to correlate.

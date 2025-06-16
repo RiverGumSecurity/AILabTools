@@ -1,0 +1,119 @@
+IncidentID: 20251206-153029  
+LogChunkID: 42/55
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful user logins from various IP addresses, primarily for users:
+  - jsteele@usculturaldynamics.com
+  - jkapoor@usculturaldynamics.com
+  - nreynell@usculturaldynamics.com
+  - gwootton@usculturaldynamics.com
+  - splanck@usculturaldynamics.com
+
+- Normal operations such as MailItemsAccessed, FilePreviewed, FileSyncDownloadedFull, and UpdateInboxRules are recorded with successful status.
+
+- Conditional Access Policies are being set and updated by the system account (NT AUTHORITY\SYSTEM), which is expected behavior for Exchange service host operations.
+
+- User agents and platforms indicate typical usage patterns (Windows 10, Edge browser, OWA clients, REST API clients).
+
+---
+
+### Suspicious Activity Discovered
+
+- There is a recorded event of **UserLoginFailed** at `2024-08-12T15:56:05` with the following details:
+  - UserId: `jsteele@usculturaldynamics.com`
+  - ClientIP: `54.219.139.191`
+  - Result: Failure with error `InvalidUserNameOrPassword`
+  - This indicates a failed login attempt.
+
+- The IP `54.219.139.191` is not seen in successful login events, but there are other IPs with multiple successful logins for the same user.
+
+- No explicit brute force attack pattern (e.g., multiple failed attempts from the same IP) is visible in this chunk, but the presence of failed login attempts from an external IP followed by successful logins from other IPs could indicate reconnaissance or credential stuffing attempts.
+
+- The IP `54.163.19.39` shows a successful login with UserId "Not Available" which is unusual and may indicate an automated or service account or potentially suspicious login.
+
+- The file `passwords.txt` was downloaded via OneDriveSync by user `jsteele@usculturaldynamics.com` from IP `73.121.154.15` on `2024-07-23T11:57:30`. The presence of a file named "passwords.txt" is suspicious and could indicate credential harvesting or data exfiltration.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- 54.219.139.191 (failed login attempt for user jsteele)
+- 54.163.19.39 (successful login with UserId "Not Available")
+- 73.121.154.15 (downloaded suspicious file "passwords.txt" and multiple successful logins)
+- 20.190.132.105 (file previewed - could be normal but noted for correlation)
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- jsteele@usculturaldynamics.com (failed login, suspicious file download)
+- UserId "Not Available" (successful login from 54.163.19.39 - requires investigation)
+- jkapoor@usculturaldynamics.com (normal activity but monitored for correlation)
+- Other users appear normal in this chunk.
+
+---
+
+### Specific Log Data of Concern
+
+1. Failed login event:
+
+```json
+{
+  "CreationTime": "2024-08-12T15:56:05",
+  "Id": "9924d2f5-2a6e-4b34-8b30-0b5d108d1c00",
+  "Operation": "UserLoginFailed",
+  "ResultStatus": "Success",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "54.219.139.191",
+  "ErrorNumber": "50126",
+  "LogonError": "InvalidUserNameOrPassword"
+}
+```
+
+2. Successful login with "Not Available" userId:
+
+```json
+{
+  "CreationTime": "2024-08-06T19:10:20",
+  "Id": "5ad1106c-52e2-4caa-a9f1-d1e84f797b00",
+  "Operation": "UserLoggedIn",
+  "ResultStatus": "Success",
+  "UserId": "Not Available",
+  "ClientIP": "54.163.19.39"
+}
+```
+
+3. Download of suspicious file "passwords.txt":
+
+```json
+{
+  "CreationTime": "2024-07-23T11:57:30",
+  "Id": "a7ff2e78-f8e3-412e-d4d4-08dcab0ea194",
+  "Operation": "FileSyncDownloadedFull",
+  "UserId": "jsteele@usculturaldynamics.com",
+  "ClientIP": "73.121.154.15",
+  "SourceFileName": "passwords.txt",
+  "Workload": "OneDrive"
+}
+```
+
+---
+
+### Conclusion
+
+- There is evidence of suspicious activity involving failed login attempts from an external IP (54.219.139.191) targeting user `jsteele@usculturaldynamics.com`.
+
+- The presence of a file named "passwords.txt" downloaded by the same user from IP 73.121.154.15 is suspicious and could indicate credential harvesting or data exfiltration.
+
+- The successful login from an IP 54.163.19.39 with UserId "Not Available" is unusual and should be investigated further.
+
+- No clear brute force attack pattern is evident in this log chunk, but the failed login attempt combined with suspicious file activity warrants further investigation.
+
+- Recommend immediate review of user `jsteele@usculturaldynamics.com` account activity, password reset, and investigation of the file "passwords.txt".
+
+---
+
+If needed, I can provide further analysis or correlation with other log chunks.

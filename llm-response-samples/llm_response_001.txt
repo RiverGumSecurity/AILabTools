@@ -1,0 +1,117 @@
+IncidentID: 20251206-151743  
+LogChunkID: 2/55  
+
+---
+
+### Summary of Normal Activity
+
+- Multiple successful mailbox access events by legitimate users such as `jsteele@usculturaldynamics.com`, `jkapoor@usculturaldynamics.com`, and `gwootton@usculturaldynamics.com`.
+- Regular issuance of tokens (`GATFRTokenIssue`) for users, indicating normal authentication and token refresh activity.
+- Conditional access policies being set and updated by system accounts (`NT AUTHORITY\SYSTEM (Microsoft.Exchange.ServiceHost)`), which is typical for Exchange Online management.
+- Normal file access and modifications on OneDrive and SharePoint by legitimate users.
+- Mail items being accessed and emails being sent by legitimate users.
+- Authentication events show successful logins from consistent IP addresses and user agents for known users.
+- Some phishing email detection and quarantine by Threat Intelligence system (e.g., a phishing email sent to `jsteele@usculturaldynamics.com` was detected and moved to JunkFolder).
+
+---
+
+### Suspicious Activity Discovered
+
+- No explicit brute force attempts or failed login floods are visible in this log chunk.
+- No evidence of multiple failed login attempts or suspicious authentication failures.
+- No unusual or unknown usernames attempting authentication.
+- No suspicious IP addresses showing failed attempts followed by successful authentication.
+- The phishing email detected and quarantined indicates an attempted phishing attack targeting the user `jsteele@usculturaldynamics.com`.
+- The phishing email was sent from `sjames@haveinfosec.com` (note the subtle domain typo: "haveinfosec.com" vs. expected "haveninfosec.com") and originated from IP `198.54.127.93`.
+- No evidence that the phishing email resulted in compromise or unauthorized access in this log chunk.
+- No suspicious mailbox or policy changes by non-system accounts.
+- All conditional access policy changes are performed by the system account, consistent with normal administration.
+
+---
+
+### IP Source Addresses Involved in Suspicious Activity
+
+- `198.54.127.93` — Sender IP of phishing email detected by Threat Intelligence.
+
+---
+
+### User Account Names Involved in Suspicious Activity
+
+- `jsteele@usculturaldynamics.com` — Target of phishing email.
+- `sjames@haveinfosec.com` — Sender of phishing email (potentially spoofed or malicious).
+
+---
+
+### Specific Log Data of Concern
+
+```json
+{
+  "CreationTime": "2024-08-06T21:15:41",
+  "Id": "c60fa2f9-af06-38ce-0d70-5f41377c9805",
+  "Operation": "TIMailData",
+  "OrganizationId": "be5be622-91c2-45ed-b6f9-ee87cc607d9d",
+  "RecordType": 28,
+  "UserKey": "ThreatIntel",
+  "UserType": 4,
+  "Version": 1,
+  "Workload": "ThreatIntelligence",
+  "ObjectId": "75eecc4a-aad8-4555-036a-08dcb65c611c155805807934903436941",
+  "UserId": "ThreatIntel",
+  "AdditionalActionsAndResults": ["OriginalDelivery: [N/A]"],
+  "AttachmentData": [
+    {
+      "FileName": "USCD-Invoice-017460.pdf",
+      "FileType": "pdf",
+      "FileVerdict": 0,
+      "SHA256": "4c5a435f8cb7df288b8a5acfa41651130eaff11f12c970fc9c05101f1b2a4b8d"
+    },
+    {
+      "FileName": "USCD-Invoice-017459.pdf",
+      "FileType": "pdf",
+      "FileVerdict": 0,
+      "SHA256": "163ea7dbe731593bfdcc635736f0bf7c73c8d52fed433fa99ef81235233287b5"
+    }
+  ],
+  "AuthDetails": [
+    {"Name": "SPF", "Value": "Pass"},
+    {"Name": "DKIM", "Value": "Fail"},
+    {"Name": "DMARC", "Value": "Best guess pass"},
+    {"Name": "Comp Auth", "Value": "pass"}
+  ],
+  "DeliveryAction": "DeliveredAsSpam",
+  "DetectionMethod": "Advanced filter",
+  "DetectionType": "Inline",
+  "Directionality": "Inbound",
+  "EventDeepLink": "https://security.microsoft.com/?hash=/threatexplorer?messageParams=75eecc4a-aad8-4555-036a-08dcb65c611c,75eecc4a-aad8-4555-036a-08dcb65c611c-15580580793490343694-1,2024-08-06T00:00:00,2024-08-06T23:59:59&view=Phish",
+  "InternetMessageId": "<2026518494.1898609.1722978704351@privateemail.com>",
+  "LatestDeliveryLocation": "JunkFolder",
+  "MessageTime": "2024-08-06T21:13:41",
+  "NetworkMessageId": "75eecc4a-aad8-4555-036a-08dcb65c611c",
+  "OriginalDeliveryLocation": "JunkFolder",
+  "P1Sender": "sjames@haveinfosec.com",
+  "P2Sender": "sjames@haveinfosec.com",
+  "PhishConfidenceLevel": "Normal",
+  "Policy": "Phish",
+  "PolicyAction": "MoveToJmf",
+  "Recipients": ["jsteele@usculturaldynamics.com"],
+  "SenderIp": "198.54.127.93",
+  "Subject": "Re: Invoices",
+  "Verdict": "Phish"
+}
+```
+
+---
+
+# Conclusion
+
+- No evidence of brute force or credential stuffing attacks in this log chunk.
+- No suspicious successful authentications from unknown or suspicious IP addresses.
+- The only suspicious activity is a phishing email detected and quarantined by the system targeting user `jsteele@usculturaldynamics.com`.
+- The phishing email originated from IP `198.54.127.93` and sender `sjames@haveinfosec.com` (likely a spoof or typo domain).
+- No indication that the phishing attempt led to compromise based on this log chunk.
+- Recommend continued monitoring for phishing attempts and user awareness training.
+- Verify that no other logs show successful authentication from suspicious IPs or unusual user activity.
+
+---
+
+If you require further analysis on other log chunks or additional data, please provide the next set of logs.
